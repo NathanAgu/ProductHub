@@ -32,7 +32,7 @@ $prefix = $_GET["baseUrl"].'/product';
 
         <div class="actions">
             <button type="submit" class="btn btn-success">Créer</button>
-            <a href="<?= $baseUrl ?>" class="btn">Annuler</a>
+            <a href="<?= $prefix ?>" class="btn">Annuler</a>
         </div>
     </form>
 
