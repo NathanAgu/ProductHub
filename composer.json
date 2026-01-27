@@ -1,5 +1,5 @@
 {
-    "name": "votre-nom/crud-app",
+    "name": "producthub/crud-app",
     "description": "Application CRUD avec Symfony Routing",
     "type": "project",
     "autoload": {
