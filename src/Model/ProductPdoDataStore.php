@@ -112,7 +112,7 @@ private function initTable()
         // Vérifier si l'élément existe
         $existing = $this->getById($id);
         if (!$existing) {
-            return null;
+            return [];
         }
 
         $updatedAt = date('Y-m-d H:i:s');

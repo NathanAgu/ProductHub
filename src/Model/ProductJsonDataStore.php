@@ -40,7 +40,7 @@ class ProductJsonDataStore implements DataStoreInterface
     {
         $items = $this->getAll();
         if (!isset($items[$id])) {
-            return null;
+            return [];
         }
         $items[$id] = array_merge($items[$id], $data, ['updated_at' => date('Y-m-d H:i:s')]);
         $this->save($items);
