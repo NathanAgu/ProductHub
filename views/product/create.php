@@ -21,6 +21,11 @@ $prefix = $_GET["baseUrl"] . '/product';
     </div>
 
     <div class="form-group">
+        <label for="country">Pays d'origine</label>
+        <input type="text" id="country" name="country">
+    </div>
+
+    <div class="form-group">
         <label for="price">Prix (€)</label>
         <input type="number" id="price" name="price" step="0.01" min="0" value="0">
     </div>
@@ -28,6 +33,11 @@ $prefix = $_GET["baseUrl"] . '/product';
     <div class="form-group">
         <label for="stock">Stock</label>
         <input type="number" id="stock" name="stock" min="0" value="0">
+    </div>
+
+    <div class="form-group">
+        <label for="expiration_date">Date d'expiration</label>
+        <input type="date" id="expiration_date" name="expiration_date">
     </div>
 
         <div class="actions">

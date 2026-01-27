@@ -42,8 +42,12 @@ private function initTable()
             description TEXT
                 CHARACTER SET utf8mb4
                 COLLATE utf8mb4_unicode_ci,
+            country VARCHAR(100)
+                CHARACTER SET utf8mb4
+                COLLATE utf8mb4_unicode_ci,
             price DECIMAL(10, 2) DEFAULT 0,
             stock INT DEFAULT 0,
+            expiration_date DATE,
             created_at DATETIME,
             updated_at DATETIME,
             INDEX idx_name (name),
@@ -87,21 +91,25 @@ private function initTable()
 
         $name = $data['name'] ?? '';
         $description = $data['description'] ?? '';
+        $country = $data['country'] ?? null;
         $price = $data['price'] ?? 0;
         $stock = $data['stock'] ?? 0;
+        $expiration_date = $data['expiration_date'] ?? null;
 
         $stmt = $this->pdo->prepare(
-            "INSERT INTO `{$this->table}` (id, name, description, price, stock, created_at) 
-             VALUES (?, ?, ?, ?, ?, ?)"
+            "INSERT INTO `{$this->table}` (id, name, description, country, price, stock, expiration_date, created_at) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([$id, $name, $description, $price, $stock, $createdAt]);
+        $stmt->execute([$id, $name, $description, $country, $price, $stock, $expiration_date, $createdAt]);
 
         return [
             'id' => $id,
             'name' => $name,
             'description' => $description,
+            'country' => $country,
             'price' => $price,
             'stock' => $stock,
+            'expiration_date' => $expiration_date,
             'created_at' => $createdAt,
             'updated_at' => null
         ];
@@ -119,22 +127,26 @@ private function initTable()
 
         $name = $data['name'] ?? $existing['name'];
         $description = $data['description'] ?? $existing['description'];
+        $country = $data['country'] ?? $existing['country'];
         $price = $data['price'] ?? $existing['price'];
         $stock = $data['stock'] ?? $existing['stock'];
+        $expiration_date = $data['expiration_date'] ?? $existing['expiration_date'];
 
         $stmt = $this->pdo->prepare(
             "UPDATE `{$this->table}` 
-             SET name = ?, description = ?, price = ?, stock = ?, updated_at = ? 
+             SET name = ?, description = ?, country = ?, price = ?, stock = ?, expiration_date = ?, updated_at = ? 
              WHERE id = ?"
         );
-        $stmt->execute([$name, $description, $price, $stock, $updatedAt, $id]);
+        $stmt->execute([$name, $description, $country, $price, $stock, $expiration_date, $updatedAt, $id]);
 
         return [
             'id' => $id,
             'name' => $name,
             'description' => $description,
+            'country' => $country,
             'price' => $price,
             'stock' => $stock,
+            'expiration_date' => $expiration_date,
             'created_at' => $existing['created_at'],
             'updated_at' => $updatedAt
         ];
