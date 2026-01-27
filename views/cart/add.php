@@ -3,23 +3,23 @@ ob_start();
 $prefix = $baseUrl . '/cart';
 ?>
 
-    <h1>Ajouter des produits au panier #<?= htmlspecialchars($cart['id']) ?></h1>
+<h1>Ajouter des produits au panier #<?= htmlspecialchars($cart['id']) ?></h1>
 
-    <form method="POST" action="<?= $prefix ?>/<?= $cart['id'] ?>/add">
+<form method="POST" action="<?= $prefix ?>/<?= $cart['id'] ?>/add">
 
-        <?php if (empty($products)): ?>
-            <p>Aucun produit disponible.</p>
-        <?php else: ?>
-            <table>
-                <thead>
+    <?php if (empty($products)): ?>
+        <p>Aucun produit disponible.</p>
+    <?php else: ?>
+        <table>
+            <thead>
                 <tr>
                     <th>Ajouter</th>
                     <th>Produit</th>
                     <th>Prix</th>
                     <th>Quantité</th>
                 </tr>
-                </thead>
-                <tbody>
+            </thead>
+            <tbody>
                 <?php foreach ($products as $product): ?>
                     <tr>
                         <td>
@@ -32,15 +32,16 @@ $prefix = $baseUrl . '/cart';
                         </td>
                     </tr>
                 <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 
-        <div class="actions">
-            <button type="submit" class="btn btn-success">Ajouter au panier</button>
-            <a href="<?= $prefix ?>/<?= $cart['id'] ?>" class="btn">Annuler</a>
-        </div>
+    <div class="actions">
+        <button type="submit" class="btn btn-success">Ajouter au panier</button>
+        <a href="<?= $prefix ?>/<?= $cart['id'] ?>" class="btn">Annuler</a>
+    </div>
 
-    </form>
+</form>
 
-<?php $content = ob_get_clean(); include __DIR__.'/../layout.php'; ?>
+<?php $content = ob_get_clean();
+include __DIR__ . '/../layout.php'; ?>

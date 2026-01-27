@@ -3,9 +3,9 @@
 return [
     'database' => [
         'host' => 'localhost:8889',
-        'dbname' => 'l3Miage',
-        'username' => 'l3Miage',
-        'password' => 'l3Miage',
+        'dbname' => 'producthub',
+        'username' => 'root',
+        'password' => 'root',
         'charset' => 'utf8mb4'
     ]
 ];
