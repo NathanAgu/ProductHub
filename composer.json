@@ -1,0 +1,17 @@
+{
+    "name": "votre-nom/crud-app",
+    "description": "Application CRUD avec Symfony Routing",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Controllers\\": "src/Controller/",
+            "Models\\": "src/Model/",
+            "Util\\": "src/util/"
+        }
+    },
+    "require": {
+        "symfony/routing": "^7.4",
+        "symfony/http-foundation": "^7.4",
+        "fakerphp/faker": "^1.24"
+    }
+}
