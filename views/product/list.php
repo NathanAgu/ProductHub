@@ -40,7 +40,15 @@ $priceRanges = $_GET['price'] ?? [];
                     </label>
                 </div>
             </div>
-            
+            <div class="dropdown">
+                <button type="button" class="btn">Marque</button>
+            </div>
+            <div class="dropdown">
+                <button type="button" class="btn">Couleur</button>
+            </div>
+            <div class="dropdown">
+                <button type="button" class="btn">Catégorie</button>
+            </div>
             <button type="submit" class="btn btn-primary">Recherche</button>
         </form>
     </div>
