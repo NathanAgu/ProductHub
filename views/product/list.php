@@ -1,12 +1,41 @@
 <?php
 ob_start();
 $prefix = $baseUrl.'/product';
+$searchQuery = $_GET['search'] ?? '';
 ?>
 
     <h1>Liste des Produits</h1>
 
     <div class="actions">
         <a href="<?= $prefix."/create?baseUrl=$baseUrl"?>" class="btn btn-primary">Nouveau Produit</a>
+        
+        <form method="GET" action="<?= $prefix ?>" style="display: inline-block;">
+            <input type="hidden" name="baseUrl" value="<?= htmlspecialchars($baseUrl) ?>">
+            <input type="text" name="search" placeholder="Recherche de produits..." 
+                   value="<?= htmlspecialchars($searchQuery) ?>">
+            <button type="submit" class="btn btn-primary">Recherche</button>
+        </form>
+        <div class="dropdown">
+            <button class="btn">Prix</button>
+            <div class="dropdown-content">
+                <label class="checkbox-option">
+                    <input type="checkbox">
+                    <span>0€ - 25€</span>
+                </label>
+                <label class="checkbox-option">
+                    <input type="checkbox">
+                    <span>25€ - 50€</span>
+                </label>
+                <label class="checkbox-option">
+                    <input type="checkbox">
+                    <span>50€ - 100€</span>
+                </label>
+                <label class="checkbox-option">
+                    <input type="checkbox">
+                    <span>100€ +</span>
+                </label>
+            </div>
+        </div>
     </div>
 
 <?php if (empty($products)): ?>

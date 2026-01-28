@@ -80,6 +80,14 @@ private function initTable()
         return $row ?: null;
     }
 
+    public function getByName($name)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM `{$this->table}` WHERE LOWER(name) LIKE LOWER(?)");
+        $stmt->execute(['%' . $name . '%']);
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function create($data)
     {
         $id = uniqid();

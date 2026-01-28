@@ -55,6 +55,58 @@
         nav a:hover {
             text-decoration: underline;
         }
+
+        /* CSS du dropdown pour les prix */
+        .dropdown {
+        position: relative;
+        display: inline-block;
+        }
+
+        .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        }
+
+        .checkbox-option {
+        display: flex;
+        align-items: center;
+        color: black;
+        padding: 12px 16px 12px 10px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        line-height: normal;
+        }
+
+        .checkbox-option:hover {
+        background-color: #ddd;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+        margin-right: 8px;
+        margin-left: 0;
+        cursor: pointer;
+        vertical-align: middle;
+        transform: none;
+        width: 16px;
+        height: 16px;
+        }
+
+        .checkbox-option span {
+        cursor: pointer;
+        vertical-align: middle;
+        line-height: normal;
+        margin: 0;
+        padding: 0;
+        }
+
+        .dropdown:hover .dropdown-content {
+        display: block;
+        }
     </style>
 </head>
 <body>

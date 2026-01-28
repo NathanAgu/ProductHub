@@ -23,12 +23,25 @@ abstract class AbstractProductController
     // Méthode abstraite à implémenter dans les classes enfants
     abstract protected function initStore();
 
-    public function index()
+    public function index(Request $request = null)
     {
-        $products = $this->store->getAll();
+        //Récupération du paramètre de la méthode GET (recherche par nom)
+        $search = '';
+        if ($request instanceof Request) {
+            $search = $request->query->get('search', '');
+        } elseif (isset($_GET['search'])) {
+            $search = $_GET['search'];
+        }
+
+        if (!empty($search)) {
+            $products = $this->store->getByName($search);
+        } else {
+            $products = $this->store->getAll();
+        }
+
         return $this->view->render('product/list', ['baseUrl' => $this->baseUrl, 'products' => $products]);
     }
-
+    
     public function create()
     {
         return $this->view->render('product/create', ['baseUrl' => $this->baseUrl]);
