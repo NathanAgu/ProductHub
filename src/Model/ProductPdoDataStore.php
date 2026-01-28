@@ -80,11 +80,48 @@ private function initTable()
         return $row ?: null;
     }
 
-    public function getByName($name)
+    public function searchFilters(string $name = '', array $priceRange = [])
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM `{$this->table}` WHERE LOWER(name) LIKE LOWER(?)");
-        $stmt->execute(['%' . $name . '%']);
+        $sql = "SELECT * FROM `{$this->table}` WHERE 1=1";
+        $params = [];
 
+        //Recherche par nom
+        if (!empty($name)) {
+            $sql .= " AND LOWER(name) LIKE LOWER(?)";
+            $params[] = '%' . trim($name) . '%';
+        }
+        
+        //Recherche par prix
+        if (!empty($priceRange)) {
+            $priceConditions = [];
+            
+            foreach ($priceRange as $range) {
+                switch ($range) {
+                    case '0-25':
+                        $priceConditions[] = "(price >= 0 AND price <= 25)";
+                        break;
+                    case '25-50':
+                        $priceConditions[] = "(price > 25 AND price <= 50)";
+                        break;
+                    case '50-100':
+                        $priceConditions[] = "(price > 50 AND price <= 100)";
+                        break;
+                    case '100+':
+                        $priceConditions[] = "(price > 100)";
+                        break;
+                }
+            }
+            
+            if (!empty($priceConditions)) {
+                $sql .= " AND (" . implode(' OR ', $priceConditions) . ")";
+            }
+        }
+        
+        $sql .= " ORDER BY created_at DESC";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 

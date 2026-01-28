@@ -2,6 +2,7 @@
 ob_start();
 $prefix = $baseUrl.'/product';
 $searchQuery = $_GET['search'] ?? '';
+$priceRanges = $_GET['price'] ?? [];
 ?>
 
     <h1>Liste des Produits</h1>
@@ -13,29 +14,35 @@ $searchQuery = $_GET['search'] ?? '';
             <input type="hidden" name="baseUrl" value="<?= htmlspecialchars($baseUrl) ?>">
             <input type="text" name="search" placeholder="Recherche de produits..." 
                    value="<?= htmlspecialchars($searchQuery) ?>">
+
+            <div class="dropdown">
+                <button type="button" class="btn">Prix</button>
+                <div class="dropdown-content">
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="price[]" value="0-25" 
+                               <?= in_array('0-25', $priceRanges) ? 'checked' : '' ?>>
+                        <span>0€ - 25€</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="price[]" value="25-50"
+                               <?= in_array('25-50', $priceRanges) ? 'checked' : '' ?>>
+                        <span>25€ - 50€</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="price[]" value="50-100"
+                               <?= in_array('50-100', $priceRanges) ? 'checked' : '' ?>>
+                        <span>50€ - 100€</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="price[]" value="100+"
+                               <?= in_array('100+', $priceRanges) ? 'checked' : '' ?>>
+                        <span>100€ +</span>
+                    </label>
+                </div>
+            </div>
+            
             <button type="submit" class="btn btn-primary">Recherche</button>
         </form>
-        <div class="dropdown">
-            <button class="btn">Prix</button>
-            <div class="dropdown-content">
-                <label class="checkbox-option">
-                    <input type="checkbox">
-                    <span>0€ - 25€</span>
-                </label>
-                <label class="checkbox-option">
-                    <input type="checkbox">
-                    <span>25€ - 50€</span>
-                </label>
-                <label class="checkbox-option">
-                    <input type="checkbox">
-                    <span>50€ - 100€</span>
-                </label>
-                <label class="checkbox-option">
-                    <input type="checkbox">
-                    <span>100€ +</span>
-                </label>
-            </div>
-        </div>
     </div>
 
 <?php if (empty($products)): ?>

@@ -25,21 +25,35 @@ abstract class AbstractProductController
 
     public function index(Request $request = null)
     {
-        //Récupération du paramètre de la méthode GET (recherche par nom)
+        //Récupération du paramètre de la méthode GET (recherche par nom, prix, marque etc...)
         $search = '';
+        $priceRange = [];
         if ($request instanceof Request) {
             $search = $request->query->get('search', '');
+            $priceRange = $request->query->get('price', []);
         } elseif (isset($_GET['search'])) {
             $search = $_GET['search'];
+            $priceRange = $_GET['price'] ?? [];
         }
 
-        if (!empty($search)) {
-            $products = $this->store->getByName($search);
+        //Vérification priceRange est une liste
+        if (!is_array($priceRange)) {
+            $priceRange = [$priceRange];
+        }
+
+        //Retourne produits filtré
+        if (!empty($search) || !empty($priceRange)) {
+            $products = $this->store->searchFilters($search, $priceRange);
         } else {
             $products = $this->store->getAll();
         }
 
-        return $this->view->render('product/list', ['baseUrl' => $this->baseUrl, 'products' => $products]);
+        return $this->view->render('product/list', [
+            'baseUrl' => $this->baseUrl,
+            'products' => $products,
+            'searchQuery' => $search,
+            'priceRanges' => $priceRange
+            ]);
     }
     
     public function create()
