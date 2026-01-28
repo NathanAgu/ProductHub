@@ -19,7 +19,7 @@ $prefix = $baseUrl . '/cart';
         <tr>
             <th>ID</th>
             <th>Produits</th>
-            <th>Date de création</th>
+            <th>Date d'ajout</th>
             <th>Date de mise à jour</th>
             <th>Actions</th>
         </tr>
