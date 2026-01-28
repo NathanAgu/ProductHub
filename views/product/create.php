@@ -1,6 +1,7 @@
 <?php
 ob_start();
 $prefix = $_GET["baseUrl"] . '/product';
+$params = require __DIR__ . '/../../src/config/params.php';
 ?>
 
 <h1>Créer un Produit</h1>
@@ -16,8 +17,31 @@ $prefix = $_GET["baseUrl"] . '/product';
     </div>
 
     <div class="form-group">
-        <label for="description">Description</label>
-        <textarea id="description" name="description" rows="4"></textarea>
+        <label for="brand">Marque</label>
+        <select name="brand" id="brand">
+            <option value="">-- Sélectionner une marque --</option>
+            <?php
+            $brands = $params['brands'];
+            foreach ($brands as $brand): 
+                $selected = (isset($product['brand']) && $product['brand'] === $brand) ? 'selected' : '';
+            ?>
+                <option value="<?= htmlspecialchars($brand) ?>" <?= $selected ?>><?= htmlspecialchars($brand) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="color">Couleur</label>
+        <select name="color" id="color">
+            <option value="">-- Sélectionner une couleur --</option>
+            <?php
+            $colors = $params['colors'];
+            foreach ($colors as $color): 
+                $selected = (isset($product['color']) && $product['color'] === $color) ? 'selected' : '';
+            ?>
+                <option value="<?= htmlspecialchars($color) ?>" <?= $selected ?>><?= htmlspecialchars($color) ?></option>
+            <?php endforeach; ?>
+        </select>
     </div>
 
     <div class="form-group">
