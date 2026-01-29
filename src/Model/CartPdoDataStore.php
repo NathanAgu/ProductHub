@@ -200,4 +200,8 @@ class CartPdoDataStore implements DataStoreInterface
             $stmt->execute([$cartId, $productId, $quantity]);
         }
     }
+
+    public function searchFilters(string $name = '', array $priceRange = []){
+        return [];
+    }
 }
