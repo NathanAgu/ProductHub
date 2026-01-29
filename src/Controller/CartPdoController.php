@@ -34,12 +34,14 @@ class CartPdoController extends AbstractCartController
             'products' => $products
         ]);
     }
+
     public function addProduct($id)
     {
         // Récupérer la requête globale
-
         $request = Request::createFromGlobals();
 
+        $tableProducts = new ProductPdoDataStore('products');
+        $allProducts = $tableProducts->getAll();
         $cart = $this->store->getById($id);
         if (!$cart) {
             return $this->view->render('error', ['baseUrl' => $this->baseUrl, 'message' => 'Panier non trouvé']);
@@ -47,10 +49,12 @@ class CartPdoController extends AbstractCartController
         $selected = $request->request->all('products');
 
         foreach ($selected as $productId => $data) {
-            if ($data["checked"]==1)
-                $this->store->addItem($id, $productId, intval($data["quantity"]));
+            if ($data["checked"] == 1) {
+                if (intval($data["quantity"]) <= $allProducts[$productId]["stock"]) {
+                    $this->store->addItem($id, $productId, intval($data["quantity"]));
+                }
+            }
         }
         return new RedirectResponse($this->baseUrl . "/cart/$id");
     }
-
 }

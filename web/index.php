@@ -10,49 +10,13 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Controllers\ProductJSonController;
 use Controllers\ProductPdoController;
 
 $params = require __DIR__ . '/../src/config/params.php';
 $pdo_baseUrl = $params['pdo_baseUrl'];;
-$json_baseUrl = $params['json_baseUrl'];;
 
 // Configuration des routes
 $routes = new RouteCollection();
-
-// ============================================
-// Routes avec ProductJsonDataStore
-// ============================================
-
-$routes->add('json_product_list', new Route($json_baseUrl.'/product', [
-    '_controller' => [ProductJSonController::class, 'index']
-], [], [], '', [], ['GET']));
-
-$routes->add('json_product_create', new Route($json_baseUrl.'/product/create', [
-    '_controller' => [ProductJSonController::class, 'create']
-], [], [], '', [], ['GET']));
-
-$routes->add('json_product_store', new Route($json_baseUrl.'/product/store', [
-    '_controller' => [ProductJSonController::class, 'store']
-], [], [], '', [], ['POST']));
-
-$routes->add('json_product_edit', new Route($json_baseUrl.'/product/{id}/edit', [
-    '_controller' => [ProductJSonController::class, 'edit']
-], [], [], '', [], ['GET']));
-
-$routes->add('json_product_update', new Route($json_baseUrl.'/product/{id}/update', [
-    '_controller' => [ProductJSonController::class, 'update']
-], [], [], '', [], ['POST']));
-
-$routes->add('json_product_delete', new Route($json_baseUrl.'/product/{id}/delete', [
-    '_controller' => [ProductJSonController::class, 'delete']
-], [], [], '', [], ['POST']));
-
-$routes->add('home', new Route('/', [
-    '_controller' => function() {
-        return new RedirectResponse($json_baseUrl.'/product');
-    }
-]));
 
 // ============================================
 // Routes avec ProductPdoDataStore

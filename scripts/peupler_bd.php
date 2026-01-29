@@ -11,25 +11,36 @@ $faker = Factory::create('fr_FR');
 // Données réalistes (contrôlées)
 // ===============================
 $productTypes = [
-    'Jus de fruits',
-    'Ordinateur portable',
-    'Téléphone',
-    'Fromage',
-    'Café moulu',
-    'Biscottes',
-    'Tablette tactile',
-    'Clavier sans fil',
-    'Casque audio',
-    'Livre'
+    'T-shirt',
+    'Jeans',
+    'Sneakers',
+    'Casquette',
+    'Veste',
+    'Short',
+    'Chemise',
+    'Pull',
+    'Robe',
+    'Jupe',
 ];
 
-$countries = [
-    'France',
-    'Espagne',
-    'Maroc',
-    'Italie',
-    'Allemagne',
-    'Belgique'
+$colors = [
+    'Rouge',
+    'Bleu',
+    'Vert',
+    'Noir',
+    'Blanc',
+    'Jaune',
+    'Gris',
+    'Rose',
+    'Violet',
+    'Orange',
+];
+
+$brands = [
+    'Nike',
+    'Adidas',
+    'Stüssy',
+    'Supreme',
 ];
 
 // ===============================
@@ -45,18 +56,12 @@ $products = [];
 
 for ($i = 0; $i < 20; $i++) {
 
-    $type = $faker->randomElement($productTypes);
-    $name = $type . ' ' . ucfirst($faker->word());
-
     $product = $productStore->create([
-        'name'        => $name,
-        'description' => $faker->sentence(12),
+        'name'        => $faker->randomElement($productTypes),
+        'color'       => $faker->randomElement($colors),
         'price'       => $faker->randomFloat(2, 1, 500),
         'stock'       => $faker->numberBetween(0, 100),
-
-        // champs enrichis (si présents)
-        'country'          => $faker->randomElement($countries),
-        'expiration_date' => $faker->dateTimeBetween('now', '+2 years')->format('Y-m-d'),
+        'brand'       => $faker->randomElement($brands),
 
         'created_at' => date('Y-m-d H:i:s'),
         'updated_at' => date('Y-m-d H:i:s')

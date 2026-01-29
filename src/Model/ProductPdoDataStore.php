@@ -39,7 +39,10 @@ private function initTable()
                 CHARACTER SET utf8mb4
                 COLLATE utf8mb4_unicode_ci
                 NOT NULL,
-            description TEXT
+            brand VARCHAR(100)
+                CHARACTER SET utf8mb4
+                COLLATE utf8mb4_unicode_ci,
+            color VARCHAR(50)
                 CHARACTER SET utf8mb4
                 COLLATE utf8mb4_unicode_ci,
             price DECIMAL(10, 2) DEFAULT 0,
@@ -131,20 +134,22 @@ private function initTable()
         $createdAt = date('Y-m-d H:i:s');
 
         $name = $data['name'] ?? '';
-        $description = $data['description'] ?? '';
+        $brand = $data['brand'] ?? null;
+        $color = $data['color'] ?? null;
         $price = $data['price'] ?? 0;
         $stock = $data['stock'] ?? 0;
 
         $stmt = $this->pdo->prepare(
-            "INSERT INTO `{$this->table}` (id, name, description, price, stock, created_at) 
-             VALUES (?, ?, ?, ?, ?, ?)"
+            "INSERT INTO `{$this->table}` (id, name, brand, color, price, stock, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([$id, $name, $description, $price, $stock, $createdAt]);
+        $stmt->execute([$id, $name, $brand, $color, $price, $stock, $createdAt]);
 
         return [
             'id' => $id,
             'name' => $name,
-            'description' => $description,
+            'brand' => $brand,
+            'color' => $color,
             'price' => $price,
             'stock' => $stock,
             'created_at' => $createdAt,
@@ -157,27 +162,29 @@ private function initTable()
         // Vérifier si l'élément existe
         $existing = $this->getById($id);
         if (!$existing) {
-            return null;
+            return [];
         }
 
         $updatedAt = date('Y-m-d H:i:s');
 
         $name = $data['name'] ?? $existing['name'];
-        $description = $data['description'] ?? $existing['description'];
+        $brand = $data['brand'] ?? $existing['brand'];
+        $color = $data['color'] ?? $existing['color'];
         $price = $data['price'] ?? $existing['price'];
         $stock = $data['stock'] ?? $existing['stock'];
 
         $stmt = $this->pdo->prepare(
             "UPDATE `{$this->table}` 
-             SET name = ?, description = ?, price = ?, stock = ?, updated_at = ? 
+             SET name = ?, brand = ?, color = ?, price = ?, stock = ?, updated_at = ? 
              WHERE id = ?"
         );
-        $stmt->execute([$name, $description, $price, $stock, $updatedAt, $id]);
+        $stmt->execute([$name, $brand, $color, $price, $stock, $updatedAt, $id]);
 
         return [
             'id' => $id,
             'name' => $name,
-            'description' => $description,
+            'brand' => $brand,
+            'color' => $color,
             'price' => $price,
             'stock' => $stock,
             'created_at' => $existing['created_at'],
