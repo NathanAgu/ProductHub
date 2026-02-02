@@ -83,7 +83,15 @@ private function initTable()
         return $row ?: null;
     }
 
-    public function searchFilters(string $name = '', array $priceRange = [])
+    public function getAllBrands()
+    {
+        $stmt = $this->pdo->query("SELECT DISTINCT brand FROM `{$this->table}` WHERE brand IS NOT NULL AND brand != '' ORDER BY brand");
+        $brands = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+        
+        return $brands ?: [];
+    }
+
+    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [])
     {
         $sql = "SELECT * FROM `{$this->table}` WHERE 1=1";
         $params = [];
@@ -120,6 +128,12 @@ private function initTable()
             }
         }
         
+        if (!empty($brands)) {
+            $placeholders = implode(',', array_fill(0, count($brands), '?'));
+            $sql .= " AND brand IN ($placeholders)";
+            $params = array_merge($params, $brands);
+        }
+
         $sql .= " ORDER BY created_at DESC";
         
         $stmt = $this->pdo->prepare($sql);

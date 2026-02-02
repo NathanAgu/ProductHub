@@ -3,6 +3,8 @@ ob_start();
 $prefix = $baseUrl.'/product';
 $searchQuery = $_GET['search'] ?? '';
 $priceRanges = $_GET['price'] ?? [];
+$selectedBrands = $_GET['brand'] ?? [];
+$colors = $_GET['color'] ?? [];
 ?>
 
     <h1>Liste des Produits</h1>
@@ -15,6 +17,7 @@ $priceRanges = $_GET['price'] ?? [];
             <input type="text" name="search" placeholder="Recherche de produits..." 
                    value="<?= htmlspecialchars($searchQuery) ?>">
 
+            <!-- Prix -->
             <div class="dropdown">
                 <button type="button" class="btn">Prix</button>
                 <div class="dropdown-content">
@@ -40,12 +43,30 @@ $priceRanges = $_GET['price'] ?? [];
                     </label>
                 </div>
             </div>
+            <!-- Marques -->
             <div class="dropdown">
                 <button type="button" class="btn">Marque</button>
+                <div class="dropdown-content">
+                    <?php foreach ($brands as $brand): ?>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="brand[]" value="<?= htmlspecialchars($brand) ?>"
+                                <?= in_array($brand, $selectedBrands) ? 'checked' : '' ?>>
+                            <span><?= htmlspecialchars($brand) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($brands)): ?>
+                        <span style="color: #999; padding: 8px; display: block;">
+                            Aucune marque disponible
+                        </span>
+                    <?php endif; ?>
+                </div>
             </div>
+            <!-- Couleurs -->
             <div class="dropdown">
                 <button type="button" class="btn">Couleur</button>
             </div>
+            <!-- Catégories -->
             <div class="dropdown">
                 <button type="button" class="btn">Catégorie</button>
             </div>

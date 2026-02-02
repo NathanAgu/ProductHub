@@ -25,7 +25,19 @@ abstract class AbstractProductController
 
     public function index(Request $request = null)
     {
-        //Récupération du paramètre de la méthode GET (recherche par nom, prix, marque etc...)
+        //Récup des marques, couleurs, catégories
+        $brands = $this->store->getAllBrands();
+
+        // echo "<pre>DEBUG - Brands from getAllBrands(): ";
+        // print_r($brands);
+        // echo "</pre>";
+
+        $selectedBrands = $_GET['brand'] ?? [];
+        if (!is_array($selectedBrands)) {
+        $selectedBrands = [$selectedBrands];
+        }
+
+        //Récup du paramètre de la méthode GET (recherche par nom, prix, marque etc...)
         $search = '';
         $priceRange = [];
         if ($request instanceof Request) {
@@ -42,8 +54,8 @@ abstract class AbstractProductController
         }
 
         //Retourne produits filtré
-        if (!empty($search) || !empty($priceRange)) {
-            $products = $this->store->searchFilters($search, $priceRange);
+        if (!empty($search) || !empty($priceRange) || !empty($selectedBrands)) {
+            $products = $this->store->searchFilters($search, $priceRange, $selectedBrands);
         } else {
             $products = $this->store->getAll();
         }
@@ -52,7 +64,9 @@ abstract class AbstractProductController
             'baseUrl' => $this->baseUrl,
             'products' => $products,
             'searchQuery' => $search,
-            'priceRanges' => $priceRange
+            'priceRanges' => $priceRange,
+            'brands' => $brands,
+            'selectedBrands' => $selectedBrands
             ]);
     }
     
