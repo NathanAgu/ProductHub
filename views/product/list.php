@@ -4,7 +4,7 @@ $prefix = $baseUrl.'/product';
 $searchQuery = $_GET['search'] ?? '';
 $priceRanges = $_GET['price'] ?? [];
 $selectedBrands = $_GET['brand'] ?? [];
-$colors = $_GET['color'] ?? [];
+$selectedColors = $_GET['color'] ?? [];
 ?>
 
     <h1>Liste des Produits</h1>
@@ -65,6 +65,21 @@ $colors = $_GET['color'] ?? [];
             <!-- Couleurs -->
             <div class="dropdown">
                 <button type="button" class="btn">Couleur</button>
+                <div class="dropdown-content">
+                    <?php foreach ($colors as $color): ?>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="color[]" value="<?= htmlspecialchars($color) ?>"
+                                <?= in_array($color, $selectedColors) ? 'checked' : '' ?>>
+                            <span><?= htmlspecialchars($color) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($colors)): ?>
+                        <span style="color: #999; padding: 8px; display: block;">
+                            Aucune couleur disponible
+                        </span>
+                    <?php endif; ?>
+                </div>
             </div>
             <!-- Catégories -->
             <div class="dropdown">

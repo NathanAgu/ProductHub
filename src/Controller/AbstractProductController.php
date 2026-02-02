@@ -27,14 +27,24 @@ abstract class AbstractProductController
     {
         //Récup des marques, couleurs, catégories
         $brands = $this->store->getAllBrands();
+        $colors = $this->store->getAllColors();
 
         // echo "<pre>DEBUG - Brands from getAllBrands(): ";
         // print_r($brands);
         // echo "</pre>";
 
+        // echo "<pre>DEBUG - Colors from getAllColors(): ";
+        // print_r($colors);
+        // echo "</pre>";
+
         $selectedBrands = $_GET['brand'] ?? [];
         if (!is_array($selectedBrands)) {
-        $selectedBrands = [$selectedBrands];
+            $selectedBrands = [$selectedBrands];
+        }
+
+        $selectedColors = $_GET['color'] ?? [];
+        if (!is_array($selectedColors)){
+            $selectedColors = [$selectedColors];
         }
 
         //Récup du paramètre de la méthode GET (recherche par nom, prix, marque etc...)
@@ -54,8 +64,8 @@ abstract class AbstractProductController
         }
 
         //Retourne produits filtré
-        if (!empty($search) || !empty($priceRange) || !empty($selectedBrands)) {
-            $products = $this->store->searchFilters($search, $priceRange, $selectedBrands);
+        if (!empty($search) || !empty($priceRange) || !empty($selectedBrands) || !empty($selectedColors)) {
+            $products = $this->store->searchFilters($search, $priceRange, $selectedBrands, $selectedColors);
         } else {
             $products = $this->store->getAll();
         }
@@ -66,7 +76,9 @@ abstract class AbstractProductController
             'searchQuery' => $search,
             'priceRanges' => $priceRange,
             'brands' => $brands,
-            'selectedBrands' => $selectedBrands
+            'selectedBrands' => $selectedBrands,
+            'colors' => $colors,
+            'selectedColors' => $selectedColors
             ]);
     }
     

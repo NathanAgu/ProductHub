@@ -91,7 +91,15 @@ private function initTable()
         return $brands ?: [];
     }
 
-    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [])
+    public function getAllColors()
+    {
+        $stmt = $this->pdo->query("SELECT DISTINCT color FROM `{$this->table}` WHERE color IS NOT NULL AND color != '' ORDER BY color");
+        $colors = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+
+        return $colors ?: [];
+    }
+
+    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [], array $colors = [])
     {
         $sql = "SELECT * FROM `{$this->table}` WHERE 1=1";
         $params = [];
@@ -132,6 +140,12 @@ private function initTable()
             $placeholders = implode(',', array_fill(0, count($brands), '?'));
             $sql .= " AND brand IN ($placeholders)";
             $params = array_merge($params, $brands);
+        }
+
+        if (!empty($colors)) {
+            $placeholders = implode(',', array_fill(0, count($colors), '?'));
+            $sql .= " AND color IN ($placeholders)";
+            $params = array_merge($params, $colors);
         }
 
         $sql .= " ORDER BY created_at DESC";
