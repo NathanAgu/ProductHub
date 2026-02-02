@@ -64,7 +64,8 @@ abstract class AbstractProductController
     public function store(Request $request)
     {
         $name = $request->request->get('name');
-        $description = $request->request->get('description');
+        $brand = $request->request->get('brand');
+        $color = $request->request->get('color');
         $price = $request->request->get('price');
         $stock = $request->request->get('stock');
 
@@ -74,7 +75,8 @@ abstract class AbstractProductController
 
         $this->store->create([
             'name' => $name,
-            'description' => $description,
+            'brand' => $brand,
+            'color' => $color,
             'price' => floatval($price),
             'stock' => intval($stock)
         ]);
@@ -94,13 +96,15 @@ abstract class AbstractProductController
     public function update(Request $request, $id)
     {
         $name = $request->request->get('name');
-        $description = $request->request->get('description');
+        $brand = $request->request->get('brand');
+        $color = $request->request->get('color');
         $price = $request->request->get('price');
         $stock = $request->request->get('stock');
 
         $product = $this->store->update($id, [
             'name' => $name,
-            'description' => $description,
+            'brand' => $brand,
+            'color' => $color,
             'price' => floatval($price),
             'stock' => intval($stock)
         ]);

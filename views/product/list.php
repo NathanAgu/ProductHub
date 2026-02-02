@@ -60,10 +60,11 @@ $priceRanges = $_GET['price'] ?? [];
         <thead>
         <tr>
             <th>Nom</th>
-            <th>Description</th>
+            <th>Marque</th>
+            <th>Couleur</th>
             <th>Prix</th>
             <th>Stock</th>
-            <th>Date de création</th>
+            <th>Date d'ajout</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -73,9 +74,8 @@ $priceRanges = $_GET['price'] ?? [];
                 <td title="<?= htmlspecialchars($product['name']) ?>">
                     <?= htmlspecialchars(mb_strimwidth($product['name'], 0, 30, '...')) ?>
                 </td>
-                <td title="<?= htmlspecialchars($product['description']) ?>">
-                    <?= htmlspecialchars(mb_strimwidth($product['description'], 0, 30, '...')) ?>
-                </td>
+                <td><?= htmlspecialchars($product['brand'] ?? '') ?></td>
+                <td><?= htmlspecialchars($product['color'] ?? '') ?></td>
                 <td><?= number_format($product['price'] ?? 0, 2) ?> €</td>
                 <td><?= htmlspecialchars($product['stock'] ?? 0) ?></td>
                 <td><?= htmlspecialchars($product['created_at'] ?? '') ?></td>
