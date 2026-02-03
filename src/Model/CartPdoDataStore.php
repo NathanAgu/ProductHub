@@ -126,7 +126,7 @@ class CartPdoDataStore implements DataStoreInterface
         $stmt = $this->pdo->query("SELECT DISTINCT color FROM `{$this->table}` WHERE color IS NOT NULL AND color != '' ORDER BY color");
         $colors = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
 
-        return $brands ?: [];
+        return $colors ?: [];
     }
 
     public function create($data = [])
@@ -217,7 +217,7 @@ class CartPdoDataStore implements DataStoreInterface
         }
     }
 
-    public function searchFilters(string $name = '', array $priceRange = []){
+    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [], array $colors = []){
         return [];
     }
 }
