@@ -2,10 +2,10 @@
 
 return [
     'database' => [
-        'host' => 'localhost:8889',
+        'host' => 'localhost:3306',
         'dbname' => 'producthub',
         'username' => 'root',
-        'password' => 'root',
+        'password' => '',
         'charset' => 'utf8mb4',
     ]
 ];

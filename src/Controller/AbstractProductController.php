@@ -23,12 +23,65 @@ abstract class AbstractProductController
     // Méthode abstraite à implémenter dans les classes enfants
     abstract protected function initStore();
 
-    public function index()
+    public function index(Request $request = null)
     {
-        $products = $this->store->getAll();
-        return $this->view->render('product/list', ['baseUrl' => $this->baseUrl, 'products' => $products]);
-    }
+        //Récup des marques, couleurs, catégories
+        $brands = $this->store->getAllBrands();
+        $colors = $this->store->getAllColors();
 
+        // echo "<pre>DEBUG - Brands from getAllBrands(): ";
+        // print_r($brands);
+        // echo "</pre>";
+
+        // echo "<pre>DEBUG - Colors from getAllColors(): ";
+        // print_r($colors);
+        // echo "</pre>";
+
+        $selectedBrands = $_GET['brand'] ?? [];
+        if (!is_array($selectedBrands)) {
+            $selectedBrands = [$selectedBrands];
+        }
+
+        $selectedColors = $_GET['color'] ?? [];
+        if (!is_array($selectedColors)){
+            $selectedColors = [$selectedColors];
+        }
+
+        //Récup du paramètre de la méthode GET (recherche par nom, prix, marque etc...)
+        $search = '';
+        $priceRange = [];
+        if ($request instanceof Request) {
+            $search = $request->query->get('search', '');
+            $priceRange = $request->query->get('price', []);
+        } elseif (isset($_GET['search'])) {
+            $search = $_GET['search'];
+            $priceRange = $_GET['price'] ?? [];
+        }
+
+        //Vérification priceRange est une liste
+        if (!is_array($priceRange)) {
+            $priceRange = [$priceRange];
+        }
+
+        //Retourne produits filtré
+        if (!empty($search) || !empty($priceRange) || !empty($selectedBrands) || !empty($selectedColors)) {
+            $products = $this->store->searchFilters($search, $priceRange, $selectedBrands, $selectedColors);
+        } else {
+            $products = $this->store->getAll();
+        }
+
+        return $this->view->render('product/list', [
+            'baseUrl' => $this->baseUrl,
+            'products' => $products,
+            'searchQuery' => $search,
+            'priceRanges' => $priceRange,
+            'brands' => $brands,
+            'selectedBrands' => $selectedBrands,
+            'colors' => $colors,
+            'selectedColors' => $selectedColors
+            ]);
+    }
+    
     public function create()
     {
         return $this->view->render('product/create', ['baseUrl' => $this->baseUrl]);

@@ -83,6 +83,79 @@ private function initTable()
         return $row ?: null;
     }
 
+    public function getAllBrands()
+    {
+        $stmt = $this->pdo->query("SELECT DISTINCT brand FROM `{$this->table}` WHERE brand IS NOT NULL AND brand != '' ORDER BY brand");
+        $brands = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+        
+        return $brands ?: [];
+    }
+
+    public function getAllColors()
+    {
+        $stmt = $this->pdo->query("SELECT DISTINCT color FROM `{$this->table}` WHERE color IS NOT NULL AND color != '' ORDER BY color");
+        $colors = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+
+        return $colors ?: [];
+    }
+
+    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [], array $colors = [])
+    {
+        $sql = "SELECT * FROM `{$this->table}` WHERE 1=1";
+        $params = [];
+
+        //Recherche par nom
+        if (!empty($name)) {
+            $sql .= " AND LOWER(name) LIKE LOWER(?)";
+            $params[] = '%' . trim($name) . '%';
+        }
+        
+        //Recherche par prix
+        if (!empty($priceRange)) {
+            $priceConditions = [];
+            
+            foreach ($priceRange as $range) {
+                switch ($range) {
+                    case '0-25':
+                        $priceConditions[] = "(price >= 0 AND price <= 25)";
+                        break;
+                    case '25-50':
+                        $priceConditions[] = "(price > 25 AND price <= 50)";
+                        break;
+                    case '50-100':
+                        $priceConditions[] = "(price > 50 AND price <= 100)";
+                        break;
+                    case '100+':
+                        $priceConditions[] = "(price > 100)";
+                        break;
+                }
+            }
+            
+            if (!empty($priceConditions)) {
+                $sql .= " AND (" . implode(' OR ', $priceConditions) . ")";
+            }
+        }
+        
+        if (!empty($brands)) {
+            $placeholders = implode(',', array_fill(0, count($brands), '?'));
+            $sql .= " AND brand IN ($placeholders)";
+            $params = array_merge($params, $brands);
+        }
+
+        if (!empty($colors)) {
+            $placeholders = implode(',', array_fill(0, count($colors), '?'));
+            $sql .= " AND color IN ($placeholders)";
+            $params = array_merge($params, $colors);
+        }
+
+        $sql .= " ORDER BY created_at DESC";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function create($data)
     {
         $id = uniqid();

@@ -1,12 +1,92 @@
 <?php
 ob_start();
 $prefix = $baseUrl.'/product';
+$searchQuery = $_GET['search'] ?? '';
+$priceRanges = $_GET['price'] ?? [];
+$selectedBrands = $_GET['brand'] ?? [];
+$selectedColors = $_GET['color'] ?? [];
 ?>
 
     <h1>Liste des Produits</h1>
 
     <div class="actions">
         <a href="<?= $prefix."/create?baseUrl=$baseUrl"?>" class="btn btn-primary">Nouveau Produit</a>
+        
+        <form method="GET" action="<?= $prefix ?>" style="display: inline-block;">
+            <input type="hidden" name="baseUrl" value="<?= htmlspecialchars($baseUrl) ?>">
+            <input type="text" name="search" placeholder="Recherche de produits..." 
+                   value="<?= htmlspecialchars($searchQuery) ?>">
+
+            <!-- Prix -->
+            <div class="dropdown">
+                <button type="button" class="btn">Prix</button>
+                <div class="dropdown-content">
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="price[]" value="0-25" 
+                               <?= in_array('0-25', $priceRanges) ? 'checked' : '' ?>>
+                        <span>0€ - 25€</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="price[]" value="25-50"
+                               <?= in_array('25-50', $priceRanges) ? 'checked' : '' ?>>
+                        <span>25€ - 50€</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="price[]" value="50-100"
+                               <?= in_array('50-100', $priceRanges) ? 'checked' : '' ?>>
+                        <span>50€ - 100€</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="price[]" value="100+"
+                               <?= in_array('100+', $priceRanges) ? 'checked' : '' ?>>
+                        <span>100€ +</span>
+                    </label>
+                </div>
+            </div>
+            <!-- Marques -->
+            <div class="dropdown">
+                <button type="button" class="btn">Marque</button>
+                <div class="dropdown-content">
+                    <?php foreach ($brands as $brand): ?>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="brand[]" value="<?= htmlspecialchars($brand) ?>"
+                                <?= in_array($brand, $selectedBrands) ? 'checked' : '' ?>>
+                            <span><?= htmlspecialchars($brand) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($brands)): ?>
+                        <span style="color: #999; padding: 8px; display: block;">
+                            Aucune marque disponible
+                        </span>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <!-- Couleurs -->
+            <div class="dropdown">
+                <button type="button" class="btn">Couleur</button>
+                <div class="dropdown-content">
+                    <?php foreach ($colors as $color): ?>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="color[]" value="<?= htmlspecialchars($color) ?>"
+                                <?= in_array($color, $selectedColors) ? 'checked' : '' ?>>
+                            <span><?= htmlspecialchars($color) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($colors)): ?>
+                        <span style="color: #999; padding: 8px; display: block;">
+                            Aucune couleur disponible
+                        </span>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <!-- Catégories -->
+            <div class="dropdown">
+                <button type="button" class="btn">Catégorie</button>
+            </div>
+            <button type="submit" class="btn btn-primary">Recherche</button>
+        </form>
     </div>
 
 <?php if (empty($products)): ?>
