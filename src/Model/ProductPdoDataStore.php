@@ -2,15 +2,18 @@
 namespace Models;
 
 use \Models\DataStoreInterface;
+use \Util\LoggingService;
 
 class ProductPdoDataStore implements DataStoreInterface
 {
     private $pdo;
     private $table;
+    private $logger;
 
     public function __construct($table = 'products')
     {
         $this->table = $table;
+        $this->logger = LoggingService::getProductLogger();
 
         // Charger la configuration
         $config = require __DIR__ . '/../config/db.php';
@@ -172,6 +175,18 @@ private function initTable()
              VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->execute([$id, $name, $brand, $color, $price, $stock, $createdAt]);
+        
+        //Log de la creation
+        $this->logger->info('Produit crée', [
+            'id' => $id,
+            'name' => $name,
+            'brand' => $brand,
+            'color' => $color,
+            'price' => $price,
+            'stock' => $stock,
+            'action' => 'create',
+            'timestamp' => $createdAt,
+        ]);
 
         return [
             'id' => $id,
@@ -200,6 +215,14 @@ private function initTable()
         $color = $data['color'] ?? $existing['color'];
         $price = $data['price'] ?? $existing['price'];
         $stock = $data['stock'] ?? $existing['stock'];
+        
+        //Log changements
+        $changes = [];
+        if ($name !== $existing['name']) $changes['name'] = ['old' => $existing['name'], 'new' => $name];
+        if ($brand !== $existing['brand']) $changes['brand'] = ['old' => $existing['brand'], 'new' => $brand];
+        if ($color !== $existing['color']) $changes['color'] = ['old' => $existing['color'], 'new' => $color];
+        if ($price != $existing['price']) $changes['price'] = ['old' => $existing['price'], 'new' => $price];
+        if ($stock != $existing['stock']) $changes['stock'] = ['old' => $existing['stock'], 'new' => $stock];
 
         $stmt = $this->pdo->prepare(
             "UPDATE `{$this->table}` 
@@ -207,6 +230,14 @@ private function initTable()
              WHERE id = ?"
         );
         $stmt->execute([$name, $brand, $color, $price, $stock, $updatedAt, $id]);
+        
+        //Log mise à jour
+        $this->logger->info('Produit modifié', [
+            'id' => $id,
+            'changes' => $changes,
+            'action' => 'update',
+            'timestamp' => $updatedAt,
+        ]);
 
         return [
             'id' => $id,
@@ -222,9 +253,27 @@ private function initTable()
 
     public function delete(string $id):bool
     {
+        $product = $this->getById($id);
+
         $stmt = $this->pdo->prepare("DELETE FROM `{$this->table}` WHERE id = ?");
         $stmt->execute([$id]);
 
-        return $stmt->rowCount() > 0;
+        $deleted =  $stmt->rowCount() > 0;
+
+        //Log suppression produit
+        if ($deleted && $product) {
+            $this->logger->warning('Product supprimé', [
+                'id' => $id,
+                'name' => $product['name'] ?? 'unknown',
+                'brand' => $product['brand'] ?? null,
+                'color' => $product['color'] ?? null,
+                'price' => $product['price'] ?? 0,
+                'stock' => $product['stock'] ?? 0,
+                'action' => 'delete',
+                'timestamp' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        return $deleted;
     }
 }

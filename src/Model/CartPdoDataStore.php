@@ -2,17 +2,21 @@
 namespace Models;
 
 use Models\DataStoreInterface;
+use \Util\LoggingService;
 
 class CartPdoDataStore implements DataStoreInterface
 {
     private $pdo;
     private $table = 'carts';
+    private $logger;
 
     public function __construct()
     {
+        $this->logger = LoggingService::getCartLogger();
+
         $config = require __DIR__ . '/../config/db.php';
         $dbConfig = $config['database'];
-
+        
         $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
         $options = [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
@@ -139,6 +143,13 @@ class CartPdoDataStore implements DataStoreInterface
         );
         $stmt->execute([$id, $createdAt]);
 
+        //Log création panier
+        $this->logger->ingo('Panier crée', [
+            'id' => $id,
+            'items_count' => 0,
+            'created_at' => $createdAt
+        ]);
+
         return [
             'id' => $id,
             'items' => [],
@@ -167,15 +178,39 @@ class CartPdoDataStore implements DataStoreInterface
         );
         $stmt->execute([$updatedAt, $id]);
 
+        //Log modification panier
+        $this->logger->info('panier mis à jour', [
+            'id' => $id,
+            'items_before' => $itemsBeforeCount,
+            'items_after' => $itemsAfterCount,
+            'total_before' => $totalBefore,
+            'total_after' => $totalAfter,
+            'updated_at' => $updatedAt
+        ]);
+
         return $this->getById($id);
     }
 
     public function delete(string $id): bool
     {
+        $cart = $this->getById($id);
+
         $stmt = $this->pdo->prepare("DELETE FROM carts WHERE id = ?");
         $stmt->execute([$id]);
 
-        return $stmt->rowCount() > 0;
+        $deleted = $stmt->rowcount() > 0;
+
+        //Log suppression panier   
+        if ($deleted) {
+            $this->logger->info('panir supprimé', [
+                'cart_id' => $id,
+                'items_count' => $itemsCount,
+                'total_value' => $totalValue,
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        return $deleted;
     }
 
     /* ================= ITEMS ================= */
