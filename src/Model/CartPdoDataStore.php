@@ -217,7 +217,7 @@ class CartPdoDataStore implements DataStoreInterface
         }
     }
 
-    public function searchFilters(string $name = '', array $priceRange = []){
+    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [], array $colors = []){
         return [];
     }
 }
