@@ -21,25 +21,19 @@ class LoggingService
     private static function getLogger(string $type): Logger
     {
         if (!isset(self::$loggers[$type])) { 
-            // Create logger
+            // Creation logger
             self::$loggers[$type] = new Logger('producthub.' . $type);
             
-            // Ensure logs directory exists
+            // Verif dossier log existe
             $logDir = __DIR__ . '/../../logs';
             if (!is_dir($logDir)) {
                 @mkdir($logDir, 0777, true);
             }
             
-            // Log to file
+            // Log dans fichier
             $logFile = $logDir . '/' . $type . '.log';
             $handler = new StreamHandler($logFile, Logger::INFO);
             self::$loggers[$type]->pushHandler($handler);
-            
-            // Optional: Also log to console in development
-            if (php_sapi_name() === 'cli' || isset($_GET['debug'])) {
-                $consoleHandler = new StreamHandler('php://stdout', Logger::DEBUG);
-                self::$loggers[$type]->pushHandler($consoleHandler);
-            }
         }
         
         return self::$loggers[$type];
