@@ -17,6 +17,7 @@ $prefix = $baseUrl . '/cart';
                 <th>Produit</th>
                 <th>Prix (€)</th>
                 <th>Quantité</th>
+                <th>Taille</th>
                 <th>Sous-total (€)</th>
                 <th>Action</th>
             </tr>
@@ -43,6 +44,7 @@ $prefix = $baseUrl . '/cart';
                                 class="form-control"
                         >
                     </td>
+                    <td><?= htmlspecialchars($item['size']) ?></td>
 
                     <td><?= number_format($subtotal, 2) ?></td>
 
