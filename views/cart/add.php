@@ -1,6 +1,7 @@
 <?php
 ob_start();
 $prefix = $baseUrl . '/cart';
+$params = require __DIR__ . '/../../src/config/params.php';
 ?>
 
 <h1>Ajouter des produits au panier #<?= htmlspecialchars($cart['id']) ?></h1>
@@ -29,6 +30,18 @@ $prefix = $baseUrl . '/cart';
                         <td><?= number_format($product['price'] ?? 0, 2) ?> €</td>
                         <td>
                             <input type="number" name="products[<?= $product['id'] ?>][quantity]" value="1" min="1">
+                        </td>
+                        <td>
+                            <select name="size" id="size">
+                                <option value="">-- Sélectionner une taille --</option>
+                                <?php
+                                $sizes = $params['sizes'];
+                                foreach ($sizes as $size): 
+                                    $selected = (isset($product['size']) && $product['size'] === $size) ? 'selected' : '';
+                                ?>
+                                    <option value="<?= htmlspecialchars($size) ?>" <?= $selected ?>><?= htmlspecialchars($size) ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </td>
                     </tr>
                 <?php endforeach; ?>

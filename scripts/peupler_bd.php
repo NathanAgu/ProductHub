@@ -3,6 +3,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Models\ProductPdoDataStore;
 use Models\CartPdoDataStore;
+use Models\CategoryDataStore;
 use Faker\Factory;
 
 $faker = Factory::create('fr_FR');
@@ -43,11 +44,32 @@ $brands = [
     'Supreme',
 ];
 
+$sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+
 // ===============================
 // Instanciation des stores
 // ===============================
 $productStore = new ProductPdoDataStore();
 $cartStore    = new CartPdoDataStore();
+$CategoryStore = new CategoryDataStore();
+
+
+// ===============================
+// Génération des catégories
+// ===============================
+
+$categoryNames = ['Hauts', 'Bas', 'Chaussures', 'Accessoires'];
+$categories = [];
+
+foreach ($categoryNames as $name) {
+    $category = [
+        'id' => uniqid(),
+        'name' => $name,
+    ];
+    $CategoryStore->create($category);
+    $categories[] = $category;
+}
+
 
 // ===============================
 // Génération des produits
@@ -62,6 +84,7 @@ for ($i = 0; $i < 20; $i++) {
         'price'       => $faker->randomFloat(2, 1, 500),
         'stock'       => $faker->numberBetween(0, 100),
         'brand'       => $faker->randomElement($brands),
+        'category_id' => $faker->randomElement($categories)['id'],
 
         'created_at' => date('Y-m-d H:i:s'),
         'updated_at' => date('Y-m-d H:i:s')
@@ -86,7 +109,8 @@ for ($i = 0; $i < 5; $i++) {
         $cartStore->addItem(
             $cart['id'],
             $productId,
-            $faker->numberBetween(1, 4)
+            $faker->numberBetween(1, 4),
+            $faker->randomElement($sizes)
         );
     }
 }

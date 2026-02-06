@@ -50,6 +50,9 @@ class CartPdoDataStore implements DataStoreInterface
                 CHARACTER SET utf8mb4
                 COLLATE utf8mb4_unicode_ci,
             quantity INT DEFAULT 1,
+            size VARCHAR(4)
+                CHARACTER SET utf8mb4
+                COLLATE utf8mb4_unicode_ci,
             UNIQUE(cart_id, product_id),
             INDEX idx_cart (cart_id),
             INDEX idx_product (product_id)
@@ -92,6 +95,7 @@ class CartPdoDataStore implements DataStoreInterface
             p.name,
             p.price,
             ci.quantity,
+            ci.size,
             (p.price * ci.quantity) AS line_total
         FROM cart_items ci
         JOIN products p ON p.id = ci.product_id
@@ -126,7 +130,7 @@ class CartPdoDataStore implements DataStoreInterface
         $stmt = $this->pdo->query("SELECT DISTINCT color FROM `{$this->table}` WHERE color IS NOT NULL AND color != '' ORDER BY color");
         $colors = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
 
-        return $brands ?: [];
+        return $colors ?: [];
     }
 
     public function create($data = [])
@@ -157,7 +161,7 @@ class CartPdoDataStore implements DataStoreInterface
         // gestion des items
         if (isset($data['items'])) {
             foreach ($data['items'] as $item) {
-                $this->addOrUpdateItem($id, $item['product_id'], $item['quantity']);
+                $this->addOrUpdateItem($id, $item['product_id'], $item['quantity'], $item['size']);
             }
         }
 
@@ -180,23 +184,23 @@ class CartPdoDataStore implements DataStoreInterface
 
     /* ================= ITEMS ================= */
 
-    public function addOrUpdateItem(string $cartId, string $productId, int $qty): void
+    public function addOrUpdateItem(string $cartId, string $productId, int $qty, string $size): void
     {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO cart_items (cart_id, product_id, quantity)
-             VALUES (?, ?, ?)
+            "INSERT INTO cart_items (cart_id, product_id, quantity, size)
+             VALUES (?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE quantity = ?"
         );
-        $stmt->execute([$cartId, $productId, $qty, $qty]);
+        $stmt->execute([$cartId, $productId, $qty, $size, $qty]);
     }
 
-    public function addItem(string $cartId, string $productId, int $quantity = 1): void
+    public function addItem(string $cartId, string $productId, int $quantity = 1, string $size = ''): void
     {
         // 1️⃣ Vérifier si le produit est déjà dans le panier
         $stmt = $this->pdo->prepare(
-            "SELECT quantity FROM cart_items WHERE cart_id = ? AND product_id = ?"
+            "SELECT quantity FROM cart_items WHERE cart_id = ? AND product_id = ? AND size = ?"
         );
-        $stmt->execute([$cartId, $productId]);
+        $stmt->execute([$cartId, $productId, $size]);
         $existing = $stmt->fetch();
 
         if ($existing) {
@@ -210,10 +214,10 @@ class CartPdoDataStore implements DataStoreInterface
         } else {
             // 3️⃣ Le produit n'existe pas → on l'ajoute
             $stmt = $this->pdo->prepare(
-                "INSERT INTO cart_items (cart_id, product_id, quantity)
-             VALUES (?, ?, ?)"
+                "INSERT INTO cart_items (cart_id, product_id, quantity, size)
+             VALUES (?, ?, ?, ?)"
             );
-            $stmt->execute([$cartId, $productId, $quantity]);
+            $stmt->execute([$cartId, $productId, $quantity, $size]);
         }
     }
 

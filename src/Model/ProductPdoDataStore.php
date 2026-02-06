@@ -45,6 +45,9 @@ private function initTable()
             color VARCHAR(50)
                 CHARACTER SET utf8mb4
                 COLLATE utf8mb4_unicode_ci,
+            category_id VARCHAR(255)
+                CHARACTER SET utf8mb4
+                COLLATE utf8mb4_unicode_ci,
             price DECIMAL(10, 2) DEFAULT 0,
             stock INT DEFAULT 0,
             created_at DATETIME,
@@ -166,12 +169,13 @@ private function initTable()
         $color = $data['color'] ?? null;
         $price = $data['price'] ?? 0;
         $stock = $data['stock'] ?? 0;
+        $categoryId = $data['category_id'] ?? null;
 
         $stmt = $this->pdo->prepare(
-            "INSERT INTO `{$this->table}` (id, name, brand, color, price, stock, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO `{$this->table}` (id, name, brand, color, price, stock, category_id, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([$id, $name, $brand, $color, $price, $stock, $createdAt]);
+        $stmt->execute([$id, $name, $brand, $color, $price, $stock, $categoryId, $createdAt]);
 
         return [
             'id' => $id,
@@ -180,6 +184,7 @@ private function initTable()
             'color' => $color,
             'price' => $price,
             'stock' => $stock,
+            'category_id' => $categoryId,
             'created_at' => $createdAt,
             'updated_at' => null
         ];
@@ -200,13 +205,14 @@ private function initTable()
         $color = $data['color'] ?? $existing['color'];
         $price = $data['price'] ?? $existing['price'];
         $stock = $data['stock'] ?? $existing['stock'];
+        $categoryId = $data['category_id'] ?? $existing['category_id'];
 
         $stmt = $this->pdo->prepare(
             "UPDATE `{$this->table}` 
-             SET name = ?, brand = ?, color = ?, price = ?, stock = ?, updated_at = ? 
+             SET name = ?, brand = ?, color = ?, price = ?, stock = ?, category_id = ?, updated_at = ? 
              WHERE id = ?"
         );
-        $stmt->execute([$name, $brand, $color, $price, $stock, $updatedAt, $id]);
+        $stmt->execute([$name, $brand, $color, $price, $stock, $categoryId, $updatedAt, $id]);
 
         return [
             'id' => $id,
@@ -215,6 +221,7 @@ private function initTable()
             'color' => $color,
             'price' => $price,
             'stock' => $stock,
+            'category_id' => $categoryId,
             'created_at' => $existing['created_at'],
             'updated_at' => $updatedAt
         ];
