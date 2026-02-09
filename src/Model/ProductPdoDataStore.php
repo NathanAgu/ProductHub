@@ -67,7 +67,7 @@ private function initTable()
 
     public function getAll()
     {
-        $stmt = $this->pdo->query("SELECT * FROM `{$this->table}` ORDER BY created_at DESC");
+        $stmt = $this->pdo->query("SELECT p.*, c.name as category_name FROM `{$this->table}` p LEFT JOIN `categories` c ON p.category_id = c.id ORDER BY created_at DESC");
         $rows = $stmt->fetchAll();
 
         $items = [];
@@ -79,7 +79,7 @@ private function initTable()
 
     public function getById($id)
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM `{$this->table}` WHERE id = ?");
+        $stmt = $this->pdo->prepare("SELECT p.*, c.name as category_name FROM `{$this->table}` p LEFT JOIN `categories` c ON p.category_id = c.id WHERE p.id = ?");
         $stmt->execute([$id]);
         $row = $stmt->fetch();
 
