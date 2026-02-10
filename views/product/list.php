@@ -115,7 +115,7 @@ $selectedColors = $_GET['color'] ?? [];
                 <td><?= htmlspecialchars($product['color'] ?? '') ?></td>
                 <td><?= number_format($product['price'] ?? 0, 2) ?> €</td>
                 <td><?= htmlspecialchars($product['stock'] ?? 0) ?></td>
-                <td><?= htmlspecialchars($product['category_id'] ?? '') ?></td>
+                <td><?= htmlspecialchars($product['category_name'] ?? '') ?></td>
                 <td><?= htmlspecialchars($product['created_at'] ?? '') ?></td>
                 <td>
                     <a href="<?= $prefix ?>/<?= $product['id'] ?>/edit" class="btn btn-sm">Modifier</a>
