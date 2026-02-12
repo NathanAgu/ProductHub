@@ -6,6 +6,7 @@ use Models\CartPdoDataStore;
 use Models\CategoryDataStore;
 use Faker\Factory;
 
+$params = require __DIR__ . '/../src/config/params.php';
 $faker = Factory::create('fr_FR');
 
 // ===============================
@@ -23,28 +24,6 @@ $productTypes = [
     'Robe',
     'Jupe',
 ];
-
-$colors = [
-    'Rouge',
-    'Bleu',
-    'Vert',
-    'Noir',
-    'Blanc',
-    'Jaune',
-    'Gris',
-    'Rose',
-    'Violet',
-    'Orange',
-];
-
-$brands = [
-    'Nike',
-    'Adidas',
-    'Stüssy',
-    'Supreme',
-];
-
-$sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 
 // ===============================
 // Instanciation des stores
@@ -80,14 +59,14 @@ for ($i = 0; $i < 20; $i++) {
 
     $product = $productStore->create([
         'name'        => $faker->randomElement($productTypes),
-        'color'       => $faker->randomElement($colors),
+        'color'       => $faker->randomElement($params["colors"]),
         'price'       => $faker->randomFloat(2, 1, 500),
         'stock'       => $faker->numberBetween(0, 100),
-        'brand'       => $faker->randomElement($brands),
+        'brand'       => $faker->randomElement($params["brands"]),
         'category_id' => $faker->randomElement($categories)['id'],
 
-        'created_at' => date('Y-m-d H:i:s'),
-        'updated_at' => date('Y-m-d H:i:s')
+        'created_at' => date('Y-m-d H'),
+        'updated_at' => date('Y-m-d H')
     ]);
 
     $products[] = $product;
@@ -110,7 +89,7 @@ for ($i = 0; $i < 5; $i++) {
             $cart['id'],
             $productId,
             $faker->numberBetween(1, 4),
-            $faker->randomElement($sizes)
+            $faker->randomElement($params["sizes"])
         );
     }
 }
