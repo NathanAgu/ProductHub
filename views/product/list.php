@@ -115,10 +115,8 @@ $selectedCategories = $_GET['category'] ?? [];
             <th>Marque</th>
             <th>Couleur</th>
             <th>Prix</th>
-            <th>Stock</th>
-            <th>Catégorie</th>
             <th>Date d'ajout</th>
-            <th>Actions</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -130,8 +128,6 @@ $selectedCategories = $_GET['category'] ?? [];
                 <td><?= htmlspecialchars($product['brand'] ?? '') ?></td>
                 <td><?= htmlspecialchars($product['color'] ?? '') ?></td>
                 <td><?= number_format($product['price'] ?? 0, 2) ?> €</td>
-                <td><?= htmlspecialchars($product['stock'] ?? 0) ?></td>
-                <td><?= htmlspecialchars($product['category_name'] ?? '') ?></td>
                 <td><?= htmlspecialchars($product['created_at'] ?? '') ?></td>
                 <td>
                     <a href="<?= $prefix ?>/<?= $product['id'] ?>/edit" class="btn btn-sm">Modifier</a>

@@ -117,22 +117,6 @@ class CartPdoDataStore implements DataStoreInterface
         return $cart;
     }
 
-    public function getAllBrands()
-    {
-        $stmt = $this->pdo->query("SELECT DISTINCT brand FROM `{$this->table}` WHERE brand IS NOT NULL AND brand != '' ORDER BY brand");
-        $brands = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
-        
-        return $brands ?: [];
-    }
-
-    public function getAllColors()
-    {
-        $stmt = $this->pdo->query("SELECT DISTINCT color FROM `{$this->table}` WHERE color IS NOT NULL AND color != '' ORDER BY color");
-        $colors = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
-
-        return $colors ?: [];
-    }
-
     public function create($data = [])
     {
         $id = uniqid();
@@ -219,9 +203,5 @@ class CartPdoDataStore implements DataStoreInterface
             );
             $stmt->execute([$cartId, $productId, $quantity, $size]);
         }
-    }
-
-    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [], array $colors = []){
-        return [];
     }
 }
