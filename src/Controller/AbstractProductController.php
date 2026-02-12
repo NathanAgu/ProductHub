@@ -28,6 +28,7 @@ abstract class AbstractProductController
         //Récup des marques, couleurs, catégories
         $brands = $this->store->getAllBrands();
         $colors = $this->store->getAllColors();
+        $categories = $this->store->getAllCategories();
 
         // echo "<pre>DEBUG - Brands from getAllBrands(): ";
         // print_r($brands);
@@ -35,6 +36,10 @@ abstract class AbstractProductController
 
         // echo "<pre>DEBUG - Colors from getAllColors(): ";
         // print_r($colors);
+        // echo "</pre>";
+
+        // echo "<pre>DEBUG - Cats from getAllCategories():";
+        // print_r($categories);
         // echo "</pre>";
 
         $selectedBrands = $_GET['brand'] ?? [];
@@ -45,6 +50,11 @@ abstract class AbstractProductController
         $selectedColors = $_GET['color'] ?? [];
         if (!is_array($selectedColors)){
             $selectedColors = [$selectedColors];
+        }
+
+        $selectedCategories = $_GET['category'] ?? [];
+        if (!is_array($selectedCategories)){
+            $selectedCategories = [$selectedCategories];
         }
 
         //Récup du paramètre de la méthode GET (recherche par nom, prix, marque etc...)
@@ -64,8 +74,8 @@ abstract class AbstractProductController
         }
 
         //Retourne produits filtré
-        if (!empty($search) || !empty($priceRange) || !empty($selectedBrands) || !empty($selectedColors)) {
-            $products = $this->store->searchFilters($search, $priceRange, $selectedBrands, $selectedColors);
+        if (!empty($search) || !empty($priceRange) || !empty($selectedBrands) || !empty($selectedColors) || !empty($selectedCategories)) {
+            $products = $this->store->searchFilters($search, $priceRange, $selectedBrands, $selectedColors, $selectedCategories);
         } else {
             $products = $this->store->getAll();
         }
@@ -78,7 +88,9 @@ abstract class AbstractProductController
             'brands' => $brands,
             'selectedBrands' => $selectedBrands,
             'colors' => $colors,
-            'selectedColors' => $selectedColors
+            'selectedColors' => $selectedColors,
+            'categories' => $categories,
+            'selectedCategories' => $selectedCategories
             ]);
     }
     
