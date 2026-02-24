@@ -23,7 +23,7 @@ abstract class AbstractProductController
     // Méthode abstraite à implémenter dans les classes enfants
     abstract protected function initStore();
 
-    public function index(Request $request = null)
+    public function index(?Request $request = null)
     {
         //Récup des marques, couleurs, catégories
         $brands = $this->store->getAllBrands();
@@ -48,12 +48,12 @@ abstract class AbstractProductController
         }
 
         $selectedColors = $_GET['color'] ?? [];
-        if (!is_array($selectedColors)){
+        if (!is_array($selectedColors)) {
             $selectedColors = [$selectedColors];
         }
 
         $selectedCategories = $_GET['category'] ?? [];
-        if (!is_array($selectedCategories)){
+        if (!is_array($selectedCategories)) {
             $selectedCategories = [$selectedCategories];
         }
 
@@ -91,9 +91,9 @@ abstract class AbstractProductController
             'selectedColors' => $selectedColors,
             'categories' => $categories,
             'selectedCategories' => $selectedCategories
-            ]);
+        ]);
     }
-    
+
     public function create()
     {
         return $this->view->render('product/create', ['baseUrl' => $this->baseUrl]);
