@@ -9,6 +9,7 @@ class ProductPdoDataStore implements DataStoreInterface
     private $pdo;
     private $table;
     private $logger;
+    private $lowStockThreshold = 10;
 
     public function __construct($table = 'products')
     {
@@ -191,7 +192,7 @@ private function initTable()
             "INSERT INTO `{$this->table}` (id, name, brand, color, price, stock, category_id, created_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([$id, $name, $brand, $color, $price, $stock, $createdAt]);
+        $stmt->execute([$id, $name, $brand, $color, $price, $stock, $categoryId, $createdAt]);
         
         //Log de la creation
         $this->logger->info('Produit crée', [
@@ -204,6 +205,9 @@ private function initTable()
             'action' => 'create',
             'timestamp' => $createdAt,
         ]);
+
+        //check niveau stock lors création
+        $this->checkStockLevel($id, $name, $stock, 'create');
 
         return [
             'id' => $id,
@@ -218,7 +222,7 @@ private function initTable()
         ];
     }
 
-    public function update($id, $data):array
+    public function update($id, $data): array
     {
         // Vérifier si l'élément existe
         $existing = $this->getById($id);
@@ -232,24 +236,69 @@ private function initTable()
         $brand = $data['brand'] ?? $existing['brand'];
         $color = $data['color'] ?? $existing['color'];
         $price = $data['price'] ?? $existing['price'];
-        $stock = $data['stock'] ?? $existing['stock'];
+        $stock = (int)($data['stock'] ?? $existing['stock']);
+        $categoryId = $data['category_id'] ?? $existing['category_id'];
         
-        //Log changements
+        // Log changements
         $changes = [];
         if ($name !== $existing['name']) $changes['name'] = ['old' => $existing['name'], 'new' => $name];
         if ($brand !== $existing['brand']) $changes['brand'] = ['old' => $existing['brand'], 'new' => $brand];
         if ($color !== $existing['color']) $changes['color'] = ['old' => $existing['color'], 'new' => $color];
         if ($price != $existing['price']) $changes['price'] = ['old' => $existing['price'], 'new' => $price];
-        if ($stock != $existing['stock']) $changes['stock'] = ['old' => $existing['stock'], 'new' => $stock];
+        if ($stock != $existing['stock']) {
+            $changes['stock'] = ['old' => $existing['stock'], 'new' => $stock];
+            
+            // Check si stock dépasse seuil
+            $oldStock = $existing['stock'];
+            
+            // Log si le stock dépasse le seuil
+            if ($oldStock > $this->lowStockThreshold && $stock <= $this->lowStockThreshold && $stock > 0) {
+                $this->logger->warning('Stock devenu faible', [
+                    'id' => $id,
+                    'name' => $name,
+                    'old_stock' => $oldStock,
+                    'new_stock' => $stock,
+                    'threshold' => $this->lowStockThreshold,
+                    'action' => 'stock_became_low',
+                    'timestamp' => $updatedAt
+                ]);
+            }
+            
+            // Log si plus de stock
+            if ($oldStock > 0 && $stock <= 0) {
+                $this->logger->warning('Produit devenu en rupture de stock', [
+                    'id' => $id,
+                    'name' => $name,
+                    'old_stock' => $oldStock,
+                    'new_stock' => $stock,
+                    'action' => 'became_out_of_stock',
+                    'timestamp' => $updatedAt
+                ]);
+            }
+            
+            // Log si stock réapprovisionné
+            if ($oldStock <= $this->lowStockThreshold && $stock > $this->lowStockThreshold) {
+                $this->logger->info('Stock réapprovisionné', [
+                    'id' => $id,
+                    'name' => $name,
+                    'old_stock' => $oldStock,
+                    'new_stock' => $stock,
+                    'threshold' => $this->lowStockThreshold,
+                    'action' => 'stock_replenished',
+                    'timestamp' => $updatedAt
+                ]);
+            }
+        }
+        if ($categoryId != $existing['category_id']) $changes['category_id'] = ['old' => $existing['category_id'], 'new' => $categoryId];
 
         $stmt = $this->pdo->prepare(
             "UPDATE `{$this->table}` 
-             SET name = ?, brand = ?, color = ?, price = ?, stock = ?, category_id = ?, updated_at = ? 
-             WHERE id = ?"
+            SET name = ?, brand = ?, color = ?, price = ?, stock = ?, category_id = ?, updated_at = ? 
+            WHERE id = ?"
         );
-        $stmt->execute([$name, $brand, $color, $price, $stock, $updatedAt, $id]);
+        $stmt->execute([$name, $brand, $color, $price, $stock, $categoryId, $updatedAt, $id]);
         
-        //Log mise à jour
+        // Log mise à jour
         $this->logger->info('Produit modifié', [
             'id' => $id,
             'changes' => $changes,
@@ -294,5 +343,78 @@ private function initTable()
         }
 
         return $deleted;
+    }
+
+    private function checkStockLevel(string $id, string $name, int $stock, string $action = 'check'): void
+    {
+        if ($stock <= 0) {
+            $this->logger->warning('Produit en rupture de stock', [
+                'id' => $id,
+                'name' => $name,
+                'stock' => $stock,
+                'action' => 'out_of_stock',
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
+        } elseif ($stock <= $this->lowStockThreshold) {
+            $this->logger->warning('Stock faible', [
+                'id' => $id,
+                'name' => $name,
+                'stock' => $stock,
+                'threshold' => $this->lowStockThreshold,
+                'action' => 'low_stock',
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
+        }
+    }
+
+    public function checkAllProductsStock(): array
+    {
+        $products = $this->getAll();
+        $lowStockProducts = [];
+        $outOfStockProducts = [];
+        
+        foreach ($products as $product) {
+            $stock = (int)($product['stock'] ?? 0);
+            
+            if ($stock <= 0) {
+                $outOfStockProducts[] = [
+                    'id' => $product['id'],
+                    'name' => $product['name'],
+                    'stock' => $stock
+                ];
+                
+                $this->logger->warning('Produit en rupture de stock (vérification)', [
+                    'id' => $product['id'],
+                    'name' => $product['name'],
+                    'stock' => $stock,
+                    'action' => 'stock_check_out_of_stock',
+                    'timestamp' => date('Y-m-d H:i:s')
+                ]);
+                
+            } elseif ($stock <= $this->lowStockThreshold) {
+                $lowStockProducts[] = [
+                    'id' => $product['id'],
+                    'name' => $product['name'],
+                    'stock' => $stock,
+                    'threshold' => $this->lowStockThreshold
+                ];
+                
+                $this->logger->warning('Stock faible (vérification)', [
+                    'id' => $product['id'],
+                    'name' => $product['name'],
+                    'stock' => $stock,
+                    'threshold' => $this->lowStockThreshold,
+                    'action' => 'stock_check_low',
+                    'timestamp' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+        
+        return [
+            'low_stock' => $lowStockProducts,
+            'out_of_stock' => $outOfStockProducts,
+            'total_low_stock' => count($lowStockProducts),
+            'total_out_of_stock' => count($outOfStockProducts)
+        ];
     }
 }

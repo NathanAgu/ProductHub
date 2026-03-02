@@ -132,7 +132,7 @@ class CartPdoDataStore implements DataStoreInterface
         $stmt->execute([$id, $createdAt]);
 
         //Log création panier
-        $this->logger->ingo('Panier crée', [
+        $this->logger->info('Panier crée', [
             'id' => $id,
             'items_count' => 0,
             'created_at' => $createdAt
