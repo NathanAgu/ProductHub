@@ -191,7 +191,6 @@ private function initTable()
             "INSERT INTO `{$this->table}` (id, name, brand, color, price, stock, category_id, created_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-<<<<<<< HEAD
         $stmt->execute([$id, $name, $brand, $color, $price, $stock, $createdAt]);
         
         //Log de la creation
@@ -205,9 +204,6 @@ private function initTable()
             'action' => 'create',
             'timestamp' => $createdAt,
         ]);
-=======
-        $stmt->execute([$id, $name, $brand, $color, $price, $stock, $categoryId, $createdAt]);
->>>>>>> acc459d9b8b961941c2f7e2e60dd4329a46707e0
 
         return [
             'id' => $id,
@@ -237,7 +233,6 @@ private function initTable()
         $color = $data['color'] ?? $existing['color'];
         $price = $data['price'] ?? $existing['price'];
         $stock = $data['stock'] ?? $existing['stock'];
-<<<<<<< HEAD
         
         //Log changements
         $changes = [];
@@ -246,16 +241,12 @@ private function initTable()
         if ($color !== $existing['color']) $changes['color'] = ['old' => $existing['color'], 'new' => $color];
         if ($price != $existing['price']) $changes['price'] = ['old' => $existing['price'], 'new' => $price];
         if ($stock != $existing['stock']) $changes['stock'] = ['old' => $existing['stock'], 'new' => $stock];
-=======
-        $categoryId = $data['category_id'] ?? $existing['category_id'];
->>>>>>> acc459d9b8b961941c2f7e2e60dd4329a46707e0
 
         $stmt = $this->pdo->prepare(
             "UPDATE `{$this->table}` 
              SET name = ?, brand = ?, color = ?, price = ?, stock = ?, category_id = ?, updated_at = ? 
              WHERE id = ?"
         );
-<<<<<<< HEAD
         $stmt->execute([$name, $brand, $color, $price, $stock, $updatedAt, $id]);
         
         //Log mise à jour
@@ -265,9 +256,6 @@ private function initTable()
             'action' => 'update',
             'timestamp' => $updatedAt,
         ]);
-=======
-        $stmt->execute([$name, $brand, $color, $price, $stock, $categoryId, $updatedAt, $id]);
->>>>>>> acc459d9b8b961941c2f7e2e60dd4329a46707e0
 
         return [
             'id' => $id,
