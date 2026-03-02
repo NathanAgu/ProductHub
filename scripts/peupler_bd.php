@@ -3,8 +3,10 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Models\ProductPdoDataStore;
 use Models\CartPdoDataStore;
+use Models\CategoryDataStore;
 use Faker\Factory;
 
+$params = require __DIR__ . '/../src/config/params.php';
 $faker = Factory::create('fr_FR');
 
 // ===============================
@@ -23,31 +25,30 @@ $productTypes = [
     'Jupe',
 ];
 
-$colors = [
-    'Rouge',
-    'Bleu',
-    'Vert',
-    'Noir',
-    'Blanc',
-    'Jaune',
-    'Gris',
-    'Rose',
-    'Violet',
-    'Orange',
-];
-
-$brands = [
-    'Nike',
-    'Adidas',
-    'Stüssy',
-    'Supreme',
-];
-
 // ===============================
 // Instanciation des stores
 // ===============================
 $productStore = new ProductPdoDataStore();
 $cartStore    = new CartPdoDataStore();
+$CategoryStore = new CategoryDataStore();
+
+
+// ===============================
+// Génération des catégories
+// ===============================
+
+$categoryNames = ['Hauts', 'Bas', 'Chaussures', 'Accessoires'];
+$categories = [];
+
+foreach ($categoryNames as $name) {
+    $category = [
+        'id' => uniqid(),
+        'name' => $name,
+    ];
+    $CategoryStore->create($category);
+    $categories[] = $category;
+}
+
 
 // ===============================
 // Génération des produits
@@ -58,13 +59,14 @@ for ($i = 0; $i < 20; $i++) {
 
     $product = $productStore->create([
         'name'        => $faker->randomElement($productTypes),
-        'color'       => $faker->randomElement($colors),
+        'color'       => $faker->randomElement($params["colors"]),
         'price'       => $faker->randomFloat(2, 1, 500),
         'stock'       => $faker->numberBetween(0, 100),
-        'brand'       => $faker->randomElement($brands),
+        'brand'       => $faker->randomElement($params["brands"]),
+        'category_id' => $faker->randomElement($categories)['id'],
 
-        'created_at' => date('Y-m-d H:i:s'),
-        'updated_at' => date('Y-m-d H:i:s')
+        'created_at' => date('Y-m-d H'),
+        'updated_at' => date('Y-m-d H')
     ]);
 
     $products[] = $product;
@@ -86,7 +88,8 @@ for ($i = 0; $i < 5; $i++) {
         $cartStore->addItem(
             $cart['id'],
             $productId,
-            $faker->numberBetween(1, 4)
+            $faker->numberBetween(1, 4),
+            $faker->randomElement($params["sizes"])
         );
     }
 }

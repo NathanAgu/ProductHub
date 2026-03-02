@@ -48,6 +48,9 @@ private function initTable()
             color VARCHAR(50)
                 CHARACTER SET utf8mb4
                 COLLATE utf8mb4_unicode_ci,
+            category_id VARCHAR(255)
+                CHARACTER SET utf8mb4
+                COLLATE utf8mb4_unicode_ci,
             price DECIMAL(10, 2) DEFAULT 0,
             stock INT DEFAULT 0,
             created_at DATETIME,
@@ -67,7 +70,7 @@ private function initTable()
 
     public function getAll()
     {
-        $stmt = $this->pdo->query("SELECT * FROM `{$this->table}` ORDER BY created_at DESC");
+        $stmt = $this->pdo->query("SELECT p.*, c.name as category_name FROM `{$this->table}` p LEFT JOIN `categories` c ON p.category_id = c.id ORDER BY created_at DESC");
         $rows = $stmt->fetchAll();
 
         $items = [];
@@ -79,7 +82,7 @@ private function initTable()
 
     public function getById($id)
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM `{$this->table}` WHERE id = ?");
+        $stmt = $this->pdo->prepare("SELECT p.*, c.name as category_name FROM `{$this->table}` p LEFT JOIN `categories` c ON p.category_id = c.id WHERE p.id = ?");
         $stmt->execute([$id]);
         $row = $stmt->fetch();
 
@@ -102,35 +105,39 @@ private function initTable()
         return $colors ?: [];
     }
 
-    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [], array $colors = [])
+    public function getAllCategories()
     {
-        $sql = "SELECT * FROM `{$this->table}` WHERE 1=1";
+        $stmt = $this->pdo->query("SELECT DISTINCT c.name FROM `{$this->table}` p LEFT JOIN `categories` c ON p.category_id = c.id WHERE c.name IS NOT NULL ORDER BY c.name");
+        $categories = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+        
+        return $categories ?: [];
+    }
+
+    public function searchFilters(string $name = '', array $priceRange = [], array $brands = [], array $colors = [], array $categories = [])
+    {
+        // Start with base query that always includes category_name
+        $sql = "SELECT p.*, c.name as category_name FROM `{$this->table}` p 
+                LEFT JOIN categories c ON p.category_id = c.id 
+                WHERE 1=1";
+        
         $params = [];
 
-        //Recherche par nom
+        // Recherche par nom
         if (!empty($name)) {
-            $sql .= " AND LOWER(name) LIKE LOWER(?)";
+            $sql .= " AND LOWER(p.name) LIKE LOWER(?)";
             $params[] = '%' . trim($name) . '%';
         }
         
-        //Recherche par prix
+        // Recherche par prix
         if (!empty($priceRange)) {
             $priceConditions = [];
             
             foreach ($priceRange as $range) {
                 switch ($range) {
-                    case '0-25':
-                        $priceConditions[] = "(price >= 0 AND price <= 25)";
-                        break;
-                    case '25-50':
-                        $priceConditions[] = "(price > 25 AND price <= 50)";
-                        break;
-                    case '50-100':
-                        $priceConditions[] = "(price > 50 AND price <= 100)";
-                        break;
-                    case '100+':
-                        $priceConditions[] = "(price > 100)";
-                        break;
+                    case '0-25': $priceConditions[] = "(p.price >= 0 AND p.price <= 25)"; break;
+                    case '25-50': $priceConditions[] = "(p.price > 25 AND p.price <= 50)"; break;
+                    case '50-100': $priceConditions[] = "(p.price > 50 AND p.price <= 100)"; break;
+                    case '100+': $priceConditions[] = "(p.price > 100)"; break;
                 }
             }
             
@@ -139,19 +146,28 @@ private function initTable()
             }
         }
         
+        // Recherche par marques
         if (!empty($brands)) {
             $placeholders = implode(',', array_fill(0, count($brands), '?'));
-            $sql .= " AND brand IN ($placeholders)";
+            $sql .= " AND p.brand IN ($placeholders)";
             $params = array_merge($params, $brands);
         }
 
+        // Recherche par couleurs
         if (!empty($colors)) {
             $placeholders = implode(',', array_fill(0, count($colors), '?'));
-            $sql .= " AND color IN ($placeholders)";
+            $sql .= " AND p.color IN ($placeholders)";
             $params = array_merge($params, $colors);
         }
 
-        $sql .= " ORDER BY created_at DESC";
+        // Recherche par categories
+        if (!empty($categories)) {
+            $placeholders = implode(',', array_fill(0, count($categories), '?'));
+            $sql .= " AND c.name IN ($placeholders)";
+            $params = array_merge($params, $categories);
+        }
+
+        $sql .= " ORDER BY p.created_at DESC";
         
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
@@ -169,11 +185,13 @@ private function initTable()
         $color = $data['color'] ?? null;
         $price = $data['price'] ?? 0;
         $stock = $data['stock'] ?? 0;
+        $categoryId = $data['category_id'] ?? null;
 
         $stmt = $this->pdo->prepare(
-            "INSERT INTO `{$this->table}` (id, name, brand, color, price, stock, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO `{$this->table}` (id, name, brand, color, price, stock, category_id, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
+<<<<<<< HEAD
         $stmt->execute([$id, $name, $brand, $color, $price, $stock, $createdAt]);
         
         //Log de la creation
@@ -187,6 +205,9 @@ private function initTable()
             'action' => 'create',
             'timestamp' => $createdAt,
         ]);
+=======
+        $stmt->execute([$id, $name, $brand, $color, $price, $stock, $categoryId, $createdAt]);
+>>>>>>> acc459d9b8b961941c2f7e2e60dd4329a46707e0
 
         return [
             'id' => $id,
@@ -195,6 +216,7 @@ private function initTable()
             'color' => $color,
             'price' => $price,
             'stock' => $stock,
+            'category_id' => $categoryId,
             'created_at' => $createdAt,
             'updated_at' => null
         ];
@@ -215,6 +237,7 @@ private function initTable()
         $color = $data['color'] ?? $existing['color'];
         $price = $data['price'] ?? $existing['price'];
         $stock = $data['stock'] ?? $existing['stock'];
+<<<<<<< HEAD
         
         //Log changements
         $changes = [];
@@ -223,12 +246,16 @@ private function initTable()
         if ($color !== $existing['color']) $changes['color'] = ['old' => $existing['color'], 'new' => $color];
         if ($price != $existing['price']) $changes['price'] = ['old' => $existing['price'], 'new' => $price];
         if ($stock != $existing['stock']) $changes['stock'] = ['old' => $existing['stock'], 'new' => $stock];
+=======
+        $categoryId = $data['category_id'] ?? $existing['category_id'];
+>>>>>>> acc459d9b8b961941c2f7e2e60dd4329a46707e0
 
         $stmt = $this->pdo->prepare(
             "UPDATE `{$this->table}` 
-             SET name = ?, brand = ?, color = ?, price = ?, stock = ?, updated_at = ? 
+             SET name = ?, brand = ?, color = ?, price = ?, stock = ?, category_id = ?, updated_at = ? 
              WHERE id = ?"
         );
+<<<<<<< HEAD
         $stmt->execute([$name, $brand, $color, $price, $stock, $updatedAt, $id]);
         
         //Log mise à jour
@@ -238,6 +265,9 @@ private function initTable()
             'action' => 'update',
             'timestamp' => $updatedAt,
         ]);
+=======
+        $stmt->execute([$name, $brand, $color, $price, $stock, $categoryId, $updatedAt, $id]);
+>>>>>>> acc459d9b8b961941c2f7e2e60dd4329a46707e0
 
         return [
             'id' => $id,
@@ -246,6 +276,7 @@ private function initTable()
             'color' => $color,
             'price' => $price,
             'stock' => $stock,
+            'category_id' => $categoryId,
             'created_at' => $existing['created_at'],
             'updated_at' => $updatedAt
         ];

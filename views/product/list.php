@@ -5,6 +5,7 @@ $searchQuery = $_GET['search'] ?? '';
 $priceRanges = $_GET['price'] ?? [];
 $selectedBrands = $_GET['brand'] ?? [];
 $selectedColors = $_GET['color'] ?? [];
+$selectedCategories = $_GET['category'] ?? [];
 ?>
 
     <h1>Liste des Produits</h1>
@@ -81,9 +82,24 @@ $selectedColors = $_GET['color'] ?? [];
                     <?php endif; ?>
                 </div>
             </div>
-            <!-- Catégories -->
+            <!-- Catégories --> 
             <div class="dropdown">
                 <button type="button" class="btn">Catégorie</button>
+                <div class="dropdown-content">
+                    <?php foreach ($categories as $category): ?>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="category[]" value="<?= htmlspecialchars($category) ?>"
+                                <?= in_array($category, $selectedCategories) ? 'checked' : '' ?>>
+                            <span><?= htmlspecialchars($category) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($categories)): ?>
+                        <span style="color: #999; padding: 8px; display: block;">
+                            Aucune catégorie disponible
+                        </span>
+                    <?php endif; ?>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">Recherche</button>
         </form>
@@ -99,9 +115,8 @@ $selectedColors = $_GET['color'] ?? [];
             <th>Marque</th>
             <th>Couleur</th>
             <th>Prix</th>
-            <th>Stock</th>
             <th>Date d'ajout</th>
-            <th>Actions</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -113,7 +128,6 @@ $selectedColors = $_GET['color'] ?? [];
                 <td><?= htmlspecialchars($product['brand'] ?? '') ?></td>
                 <td><?= htmlspecialchars($product['color'] ?? '') ?></td>
                 <td><?= number_format($product['price'] ?? 0, 2) ?> €</td>
-                <td><?= htmlspecialchars($product['stock'] ?? 0) ?></td>
                 <td><?= htmlspecialchars($product['created_at'] ?? '') ?></td>
                 <td>
                     <a href="<?= $prefix ?>/<?= $product['id'] ?>/edit" class="btn btn-sm">Modifier</a>

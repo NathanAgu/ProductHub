@@ -20,6 +20,7 @@ $prefix = $baseUrl . '/cart';
             <th>Produit</th>
             <th>Prix unitaire</th>
             <th>Quantité</th>
+            <th>Taille</th>
             <th>Total</th>
         </tr>
         </thead>
@@ -32,6 +33,7 @@ $prefix = $baseUrl . '/cart';
             <td><?= htmlspecialchars($item['name']) ?></td>
             <td><?= number_format($item['price'], 2) ?> €</td>
             <td><?= $item['quantity'] ?></td>
+            <td><?= htmlspecialchars($item['size']) ?></td>
             <td><?= number_format($item['line_total'], 2) ?> €</td>
         </tr>
         <?php endforeach; ?>
