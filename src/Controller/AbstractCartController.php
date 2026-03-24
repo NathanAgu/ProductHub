@@ -70,7 +70,6 @@ abstract class AbstractCartController
     public function update(Request $request, $cartId)
     {
         // Récupérer le panier
-
         $cart = $this->store->getById($cartId);
         if (!$cart) {
             return $this->view->render('cart/error', [
@@ -80,16 +79,35 @@ abstract class AbstractCartController
         }
 
         // Récupérer les données POST
-        $items = $request->request->all('items'); // tableau [product_id => quantity]
-
-        foreach ($items as $productId => $qty) {
-            $qty = (int) $qty;
+        $items = $request->request->all('items'); // tableau [product_id => ['quantity' => X, 'size' => 'M']]
+        
+        // Vérifier le format des données reçues
+        // Si c'est un tableau associatif avec product_id comme clé et quantité comme valeur
+        // mais que vous avez besoin de la taille, il faut adapter la structure du formulaire
+        
+        foreach ($items as $productId => $itemData) {
+            // Gérer deux formats possibles
+            if (is_array($itemData)) {
+                // Format: items[product_id][quantity] et items[product_id][size]
+                $qty = (int) ($itemData['quantity'] ?? 0);
+                $size = $itemData['size'] ?? '';
+            } else {
+                // Format simple: items[product_id] = quantity (pas de taille)
+                $qty = (int) $itemData;
+                $size = ''; // Valeur par défaut si pas de taille
+            }
+            
             if ($qty <= 0) {
                 // Supprimer le produit du panier si quantité <= 0
-                $this->store->removeItem($cartId, $productId);
+                // Note: Il faudrait aussi passer la taille pour la suppression
+                if (!empty($size)) {
+                    $this->store->removeItem($cartId, $productId, $size);
+                } else {
+                    $this->store->removeItem($cartId, $productId);
+                }
             } else {
-                // Ajouter ou mettre à jour la quantité
-                $this->store->addOrUpdateItem($cartId, $productId, $qty);
+                // Ajouter ou mettre à jour la quantité avec la taille
+                $this->store->addOrUpdateItem($cartId, $productId, $qty, $size);
             }
         }
 

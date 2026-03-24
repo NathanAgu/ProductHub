@@ -57,14 +57,14 @@ class CartPdoDataStore implements DataStoreInterface
             size VARCHAR(4)
                 CHARACTER SET utf8mb4
                 COLLATE utf8mb4_unicode_ci,
-            UNIQUE(cart_id, product_id),
+            UNIQUE KEY unique_cart_product_size (cart_id, product_id, size),
             INDEX idx_cart (cart_id),
             INDEX idx_product (product_id)
         )
         ENGINE=InnoDB
         DEFAULT CHARSET=utf8mb4
         COLLATE=utf8mb4_unicode_ci
-    ");
+        ");
     }
 
     /* ================= CART ================= */
@@ -77,13 +77,13 @@ class CartPdoDataStore implements DataStoreInterface
         $items = [];
         foreach ($carts as $cart) {
             $items[$cart['id']] = $this->getById($cart['id']);
-        }
+        }  
         return $items;
     }
 
     public function getById($id)
     {
-        // 1️⃣ Récupérer le panier
+        // Récupérer le panier
         $stmt = $this->pdo->prepare("SELECT * FROM carts WHERE id = ?");
         $stmt->execute([$id]);
         $cart = $stmt->fetch();
@@ -92,7 +92,7 @@ class CartPdoDataStore implements DataStoreInterface
             return null;
         }
 
-        // 2️⃣ Récupérer les items avec les infos produits
+        // Récupérer les items avec les infos produits
         $stmt = $this->pdo->prepare("
         SELECT 
             ci.product_id,
@@ -109,7 +109,7 @@ class CartPdoDataStore implements DataStoreInterface
 
         $items = $stmt->fetchAll();
 
-        // 3️⃣ Calcul du total du panier
+        // Calcul du total du panier
         $total = 0;
         foreach ($items as $item) {
             $total += $item['line_total'];
@@ -215,7 +215,7 @@ class CartPdoDataStore implements DataStoreInterface
 
     public function addItem(string $cartId, string $productId, int $quantity = 1, string $size = ''): void
     {
-        // 1️⃣ Vérifier si le produit est déjà dans le panier
+        // Vérifier si le produit avec la MÊME TAILLE est déjà dans le panier
         $stmt = $this->pdo->prepare(
             "SELECT quantity FROM cart_items WHERE cart_id = ? AND product_id = ? AND size = ?"
         );
@@ -223,20 +223,47 @@ class CartPdoDataStore implements DataStoreInterface
         $existing = $stmt->fetch();
 
         if ($existing) {
-            // 2️⃣ Le produit existe → on incrémente la quantité
+            // Le produit avec cette taille existe → on incrémente la quantité
             $stmt = $this->pdo->prepare(
                 "UPDATE cart_items
-             SET quantity = quantity + ?
-             WHERE cart_id = ? AND product_id = ?"
+                SET quantity = quantity + ?
+                WHERE cart_id = ? AND product_id = ? AND size = ?"
             );
-            $stmt->execute([$quantity, $cartId, $productId]);
+            $stmt->execute([$quantity, $cartId, $productId, $size]);
         } else {
-            // 3️⃣ Le produit n'existe pas → on l'ajoute
+            // Le produit avec cette taille n'existe pas → on l'ajoute
             $stmt = $this->pdo->prepare(
                 "INSERT INTO cart_items (cart_id, product_id, quantity, size)
-             VALUES (?, ?, ?, ?)"
+                VALUES (?, ?, ?, ?)"
             );
             $stmt->execute([$cartId, $productId, $quantity, $size]);
         }
+    }
+
+    /* ================= ITEMS ================= */
+
+    public function removeItem(string $cartId, string $productId, string $size = ''): void
+    {
+        if (!empty($size)) {
+            // Supprimer un item spécifique avec sa taille
+            $stmt = $this->pdo->prepare(
+                "DELETE FROM cart_items WHERE cart_id = ? AND product_id = ? AND size = ?"
+            );
+            $stmt->execute([$cartId, $productId, $size]);
+        } else {
+            // Supprimer tous les items de ce produit (toutes tailles)
+            $stmt = $this->pdo->prepare(
+                "DELETE FROM cart_items WHERE cart_id = ? AND product_id = ?"
+            );
+            $stmt->execute([$cartId, $productId]);
+        }
+        
+        // Log de la suppression
+        $this->logger->info('Produit supprimé du panier', [
+            'cart_id' => $cartId,
+            'product_id' => $productId,
+            'size' => $size ?: 'toutes tailles',
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
     }
 }

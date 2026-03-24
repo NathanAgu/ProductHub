@@ -37,24 +37,53 @@ class CartPdoController extends AbstractCartController
 
     public function addProduct($id)
     {
-        // Récupérer la requête globale
         $request = Request::createFromGlobals();
-
         $tableProducts = new ProductPdoDataStore('products');
         $allProducts = $tableProducts->getAll();
         $cart = $this->store->getById($id);
+        
         if (!$cart) {
-            return $this->view->render('error', ['baseUrl' => $this->baseUrl, 'message' => 'Panier non trouvé']);
+            return $this->view->render('error', [
+                'baseUrl' => $this->baseUrl, 
+                'message' => 'Panier non trouvé'
+            ]);
         }
+        
         $selected = $request->request->all('products');
 
         foreach ($selected as $productId => $data) {
-            if ($data["checked"] == 1) {
-                if (intval($data["quantity"]) <= $allProducts[$productId]["stock"]) {
-                    $this->store->addItem($id, $productId, intval($data["quantity"]));
+            if (isset($data["checked"]) && $data["checked"] == 1) {
+                $quantity = intval($data["quantity"] ?? 1);
+                $size = $data["size"] ?? ''; // Récupérer la taille
+                
+                if ($quantity > 0 && $quantity <= $allProducts[$productId]["stock"]) {
+                    // ✅ Passer la taille à addItem
+                    $this->store->addItem($id, $productId, $quantity, $size);
                 }
             }
         }
+        
         return new RedirectResponse($this->baseUrl . "/cart/$id");
+    }
+
+    public function removeProduct($cartId, $productId, Request $request)
+    {
+        // Récupérer la taille depuis la requête GET
+        $size = $request->query->get('size', '');
+        
+        // Récupérer le panier pour vérifier qu'il existe
+        $cart = $this->store->getById($cartId);
+        if (!$cart) {
+            return $this->view->render('error', [
+                'baseUrl' => $this->baseUrl, 
+                'message' => 'Panier non trouvé'
+            ]);
+        }
+        
+        // Supprimer le produit du panier
+        $this->store->removeItem($cartId, $productId, $size);
+        
+        // Rediriger vers la page d'édition du panier
+        return new RedirectResponse($this->baseUrl . "/cart/$cartId/edit");
     }
 }

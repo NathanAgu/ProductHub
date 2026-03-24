@@ -150,6 +150,10 @@ $routes->add('pdo_cart_update', new Route($pdo_baseUrl.'/cart/{id}/update', [
     '_controller' => [CartPdoController::class, 'update']
 ], [], [], '', [], ['POST']));
 
+$routes->add('pdo_cart_remove_product', new Route($pdo_baseUrl . '/cart/{cartId}/remove/{productId}',
+    ['_controller' => [CartPdoController::class, 'removeProduct']
+],[], [], '', [], ['GET']));
+
 // Traitement de la requête
 $request = Request::createFromGlobals();
 $context = new RequestContext();

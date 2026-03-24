@@ -13,6 +13,7 @@ $params = require __DIR__ . '/../../src/config/params.php';
     });
 </script>
 
+<!-- add.php - Version corrigée -->
 <h1>Ajouter des produits au panier #<?= htmlspecialchars($cart['id']) ?></h1>
 
 <form method="POST" action="<?= $prefix ?>/<?= $cart['id'] ?>/add">
@@ -20,7 +21,7 @@ $params = require __DIR__ . '/../../src/config/params.php';
     <?php if (empty($products)): ?>
         <p>Aucun produit disponible.</p>
     <?php else: ?>
-        <table>
+        <table class="table">
             <thead>
                 <tr>
                     <th>Ajouter</th>
@@ -28,20 +29,27 @@ $params = require __DIR__ . '/../../src/config/params.php';
                     <th>Prix</th>
                     <th>Quantité</th>
                     <th>Stock dispo</th>
-                    <th>taille</th>
+                    <th>Taille</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($products as $product): ?>
                     <tr>
                         <td>
-                            <input type="checkbox" name="products[<?= $product['id'] ?>][checked]" value="1"
-                                <?= $product['stock'] <= 0 ? 'disabled' : '' ?>>
+                            <input type="checkbox" 
+                                   name="products[<?= $product['id'] ?>][checked]" 
+                                   value="1"
+                                   <?= $product['stock'] <= 0 ? 'disabled' : '' ?>>
                         </td>
                         <td><?= htmlspecialchars($product['name']) ?></td>
                         <td><?= number_format($product['price'] ?? 0, 2) ?> €</td>
                         <td>
-                            <input type="number" name="products[<?= $product['id'] ?>][quantity]" value="1" min="1">
+                            <input type="number" 
+                                   name="products[<?= $product['id'] ?>][quantity]" 
+                                   value="1" 
+                                   min="1"
+                                   class="form-control"
+                                   style="width: 80px;">
                         </td>
                         <td>
                             <?php
@@ -60,21 +68,22 @@ $params = require __DIR__ . '/../../src/config/params.php';
                                 $text = 'Rupture';
                             }
                             ?>
-                            <span
-                                style="background-color: <?= $bgColor ?>; color: <?= $color ?>; padding: 5px 10px; border-radius: 3px; font-weight: bold;">
+                            <span style="background-color: <?= $bgColor ?>; color: <?= $color ?>; padding: 5px 10px; border-radius: 3px; font-weight: bold;">
                                 <?= $stock ?> - <?= $text ?>
                             </span>
                         </td>
                         <td>
-                            <select name="size" id="size">
+                            <select name="products[<?= $product['id'] ?>][size]" 
+                                    id="size_<?= $product['id'] ?>"
+                                    class="form-control"
+                                    <?= $product['stock'] <= 0 ? 'disabled' : '' ?>>
                                 <option value="">-- Sélectionner une taille --</option>
                                 <?php
+                                $params = require __DIR__ . '/../../src/config/params.php';
                                 $sizes = $params['sizes'];
                                 foreach ($sizes as $size):
-                                    $selected = (isset($product['size']) && $product['size'] === $size) ? 'selected' : '';
                                     ?>
-                                    <option value="<?= htmlspecialchars($size) ?>" <?= $selected ?>><?= htmlspecialchars($size) ?>
-                                    </option>
+                                    <option value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </td>

@@ -26,6 +26,7 @@ $prefix = $baseUrl . '/cart';
 
             <?php $total = 0; ?>
 
+            <!-- Dans edit.php -->
             <?php foreach ($cart['items'] as $item): ?>
                 <?php
                 $subtotal = $item['price'] * $item['quantity'];
@@ -34,24 +35,25 @@ $prefix = $baseUrl . '/cart';
                 <tr>
                     <td><?= htmlspecialchars($item['name']) ?></td>
                     <td><?= number_format($item['price'], 2) ?></td>
-
                     <td style="width:120px">
-                        <input
-                                type="number"
-                                name="items[<?= $item['product_id'] ?>]"
-                                value="<?= $item['quantity'] ?>"
-                                min="0"
-                                class="form-control"
-                        >
+                        <input type="hidden" 
+                            name="items[<?= $item['product_id'] ?>][product_id]" 
+                            value="<?= $item['product_id'] ?>">
+                        <input type="number"
+                            name="items[<?= $item['product_id'] ?>][quantity]"
+                            value="<?= $item['quantity'] ?>"
+                            min="0"
+                            class="form-control">
+                        <input type="hidden"
+                            name="items[<?= $item['product_id'] ?>][size]"
+                            value="<?= htmlspecialchars($item['size']) ?>">
                     </td>
                     <td><?= htmlspecialchars($item['size']) ?></td>
-
-                    <td><?= number_format($subtotal, 2) ?></td>
-
+                    <td><?= number_format($subtotal, 2) ?> €</td>
                     <td>
-                        <a href="<?= $prefix ?>/<?= $cart['id'] ?>/remove/<?= $item['product_id'] ?>"
-                           class="btn btn-sm btn-danger"
-                           onclick="return confirm('Supprimer ce produit du panier ?')">
+                        <a href="<?= $prefix ?>/<?= $cart['id'] ?>/remove/<?= $item['product_id'] ?>?size=<?= urlencode($item['size']) ?>"
+                        class="btn btn-sm btn-danger"
+                        onclick="return confirm('Supprimer ce produit du panier ?')">
                             Supprimer
                         </a>
                     </td>
