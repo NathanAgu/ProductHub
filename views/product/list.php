@@ -108,7 +108,7 @@ $selectedCategories = $_GET['category'] ?? [];
 <?php if (empty($products)): ?>
     <p>Aucun produit trouvé.</p>
 <?php else: ?>
-    <Fble>
+    <table>
         <thead>
         <tr>
             <th>Nom</th>
